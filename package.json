@@ -1,0 +1,23 @@
+{
+  "name": "auto-ecole",
+  "version": "1.0.0",
+  "main": "main/main.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:renderer\" \"wait-on http://localhost:5173 && electron .\"",
+    "dev:renderer": "cd renderer && npm run dev",
+    "build": "vite build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "electron": "^41.6.1",
+    "sqlite3": "^6.0.1"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "vite": "^8.0.13",
+    "wait-on": "^9.0.10"
+  }
+}

@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react, { reactCompilerPreset } from '@vitejs/plugin-react'
 import babel from '@rolldown/plugin-babel'
+import path from "path"
 
 // https://vite.dev/config/
 // export default defineConfig({
@@ -9,8 +10,11 @@ import babel from '@rolldown/plugin-babel'
 //     babel({ presets: [reactCompilerPreset()] })
 //   ],
 // })
-export default {
-  server: {
-    port: 5173
-  }
-}
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+})

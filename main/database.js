@@ -16,6 +16,7 @@ db.serialize(() => {
             date_de_naissance TEXT,
             telephone TEXT,
             type_permis TEXT,
+            status TEXT DEFAULT 'actif',
             date_inscription TEXT
         )
     `);

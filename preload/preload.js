@@ -1,8 +1,10 @@
 const { contextBridge, ipcRenderer } = require("electron");
-const { default: Students } = require("../renderer/src/pages/Students");
 
-contextBridge.executeInMainWorld("api", {
-    getStudents: () => ipcRenderer.invoke("students:getAll"),
+console.log("== PRELOAD LOADED SUCCESSFULLY");
+
+contextBridge.exposeInMainWorld("api", {
+    getStudents: () => 
+        ipcRenderer.invoke("students:getAll"),
 
     addStudent: (Student) =>
         ipcRenderer.invoke("students:add", Student),
@@ -12,4 +14,6 @@ contextBridge.executeInMainWorld("api", {
 
     deleteStudent: (id) =>
         ipcRenderer.invoke("students:delete", id),
+    getStudentById: (id) => 
+        ipcRenderer.invoke("students:getById", id),
 });

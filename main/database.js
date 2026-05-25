@@ -20,6 +20,30 @@ db.serialize(() => {
             date_inscription TEXT
         )
     `);
+    db.run(`
+        CREATE TABLE IF NOT EXISTS payements (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER NOT NULL REFERENCES students(id),
+            montant INTEGER NOT NULL,
+            motif TEXT DEFAULT 'autre',
+            date_payement TEXR DEFAULT (date(now)),
+            note TEXT
+        )
+    `);
+    db.run(`
+        CREATE TABLE IF NOT EXISTS formations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nom TEXT NOT NULL,
+            prix NOT NULL        
+        )
+    `);
+    db.run(`
+        CREATE TABLE IF NOT EXISTS student_formations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER NOT NULL REFERENCES students(id),
+            formation_id INTEGER NOT NULL REFERENCES formations(id)
+        )
+    `);
 });
 
 module.exports = db;

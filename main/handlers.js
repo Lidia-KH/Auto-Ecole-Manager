@@ -161,13 +161,19 @@ ipcMain.handle("payements:getByStudent", (_, studentId) => {
     })
 });
 
-ipcMain.handle("payements:add", (_, {student_id, montant, motif, date_payement, note}) => {
+ipcMain.handle("payements:add", (_, data) => {
     return new Promise((resolve, reject) => {
         db.run(`
-            INSERT INTO payements (student_id, amount, montant, date_payement, note)
+            INSERT INTO payements (student_id, montant, motif, date_payement, note)
             VALUES (?,?,?,?,?)
             `,
-        [student_id, montant, motif || "autre", date_payement || new Date().toLocaleDateString("sv-SE"), note || ""],
+        [
+            data.student_id,
+            data.montant, 
+            data.motif || "autre", 
+            data.date_payement || new Date().toLocaleDateString("sv-SE"), 
+            data.note || ""
+        ],
     function(err) {
         if(err) reject(err)
         else resolve({ success:true, id: this.lastID })
@@ -217,7 +223,7 @@ ipcMain.handle("payements:getBalance", (_, studentId) =>{
 
 ipcMain.handle("payements:dashboardStats", () => {
     return new Promise((resolve, reject) => {
-        const today = new Date.toLocaleDateString("sv-SE")
+        let today = new Date().toLocaleDateString("sv-SE")
         const firstMonth = today.slice(0, 7) + "-01"
 
         const results = {}
@@ -288,7 +294,7 @@ ipcMain.handle("payements:allBalances", () =>{
         db.all(
             `SELECT s.id, s.numero, s.nom, s.prenom, s.telephone,
             f.nom as formation_nom, f.prix, COALESCE(SUM(p.montant),0) as total_paye
-            FROM student s
+            FROM students s
             LEFT JOIN student_formations sf ON sf.student_id = s.id
             LEFT JOIN formations f ON f.id = sf.formation_id
             LEFT JOIN payements p ON p.student_id = s.id

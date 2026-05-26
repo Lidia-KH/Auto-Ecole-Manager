@@ -1,6 +1,7 @@
 const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
 const { app } = require("electron");
+const { formatWithOptions } = require("util");
 
 const dbPath = path.join(app.getPath("userData"), "autoecole.db");
 
@@ -26,7 +27,7 @@ db.serialize(() => {
             student_id INTEGER NOT NULL REFERENCES students(id),
             montant INTEGER NOT NULL,
             motif TEXT DEFAULT 'autre',
-            date_payement TEXR DEFAULT (date(now)),
+            date_payement TEXT DEFAULT CURRENT_DATE,
             note TEXT
         )
     `);
@@ -34,7 +35,7 @@ db.serialize(() => {
         CREATE TABLE IF NOT EXISTS formations (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nom TEXT NOT NULL,
-            prix NOT NULL        
+            prix INTEGER NOT NULL        
         )
     `);
     db.run(`

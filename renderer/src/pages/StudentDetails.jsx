@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import AddPayementModal from "../components/payements/AddPayementModal"
 
 function InfoRow( { label, value, mono = false }) {
     return(
@@ -28,6 +29,7 @@ export default function StudentDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [student, setStudent] = useState(null);
+    const [showPayement, setShowPayement] = useState(false);
 
     useEffect(() => {
         async function loadStudent() {
@@ -68,7 +70,7 @@ export default function StudentDetails() {
                     Retour aux élèves
                 </button>
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                    <div className="h-20 bg-gradiant-to-r from-blue-50 to-indigo-50" />
+                    <div className="h-20 bg-gradient-to-r from-blue-50 to-indigo-50" />
                     <div className="px-6 pb-6 -mt-10">
                         <div className="w-16 h-16 rounded-2xl bg-blue-100 text-blue-600 text-xl font-bold
                         flex items-center justify-center ring-4 ring-white mb-4 shadow-sm">
@@ -122,7 +124,11 @@ export default function StudentDetails() {
                         ${color === "blue" ? "border-blue-100 bg-blue-50 text-blue-700 hover:bg-blue-100" : ""}
                         ${color === "emerald" ? "border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-100": ""}
                         ${color === "indigo" ? "border-indigo-100 bg-indigo-50 text-indigo-700 hover:bg-indigo-100": ""}
-                        ${color === "green" ? "border-green-100 bg-green-50 text-green-700 hover:bg-green-100" : ""}`}>
+                        ${color === "green" ? "border-green-100 bg-green-50 text-green-700 hover:bg-green-100" : ""}`}
+                        onClick={() => {
+                            if(label === "Enregistrer paiement"){ setShowPayement(true) }
+                        }}>
+                        
                             <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d={icon} />
                             </svg>
@@ -132,6 +138,13 @@ export default function StudentDetails() {
                     )}
 
                 </div>
+
+                {showPayement && (
+                    <AddPayementModal
+                        student={student}
+                        onClose={() => setShowPayement(false)}
+                        onSaved={() => { setShowPayement(false) }} />
+                )}
 
             </div>
 

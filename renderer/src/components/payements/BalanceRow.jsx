@@ -19,9 +19,17 @@ export default function BalanceRow({ s, onPlay, onClick }) {
 
                     </div>
                     <div>
-                        <p className="text-xs text-gray-400 font-mono">
-                            {s.numero}
-                        </p>
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <h1 className="text-xs font-bold text-gray-900 tracking-tight">
+                                {s.nom} {s.prenom}
+                                </h1>
+                                <p className="text-xs text-gray-400 mt-0.5 font-mono">
+                                    {s.numero}
+                                </p>
+                            </div>
+                        </div>
+                        
                     </div>
                 </div>
 
@@ -56,7 +64,7 @@ export default function BalanceRow({ s, onPlay, onClick }) {
             <td className="px-5 py-3">
                 <button
                 onClick={e => {e.stopPropagation(); onPlay(e)}} 
-                className="opacity-0 group-hover:opacity-100 transition-opacity px-3 pu-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg">
+                className="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg">
                     + Paiement
 
                 </button>

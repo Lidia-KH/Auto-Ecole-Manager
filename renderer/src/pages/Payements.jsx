@@ -104,14 +104,14 @@ export default function Payements(){
                             Finances de l'auto-école
                         </p>
                     </div>
-                    <button 
+                    {/* <button 
                     onClick={() => setPayingFor({id:null, nom:"—", prenom:""})}
                     className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-all active:scale-95 shadow-blue-200">
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                         </svg>
                         Ajouter un paiement
-                    </button>
+                    </button> */}
                 </div>
                 <div className="flex gap-1 bg-gray-100 rounded-xl w-fit">
                     {[["finances", "Vue financière"], ["élèves", "Par élève"]].map(([key, label]) => (

@@ -1,3 +1,5 @@
+import fmt from "./fmt"
+import ini from "./ini"
 
 export default function BalanceRow({ s, onPlay, onClick }) {
     const pct = s.prix > 0 ? Math.round((s.total_paye / s.prix) * 100) : 0

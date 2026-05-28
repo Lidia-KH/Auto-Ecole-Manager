@@ -311,3 +311,44 @@ ipcMain.handle("payements:allBalances", () =>{
         )
     })
 });
+
+// ====== Session handler ======
+
+ipcMain.handle("sessions:getByStudent", (_, studentId) => {
+    return new Promise((resolve, reject) => {
+        db.all(
+            `SELECT * FROM sessions
+            WHERE student_id = ?
+            ORDER BY date_seance DESC`,
+            [studentId],
+            (err, rows) => {
+                if(err) reject(err);
+                else resolve(rows);
+            }
+        )
+    })
+});
+
+ipcMain.handle("sessions:add", (_, data) => {
+    return new Promise((resolve, reject) => {
+        db.run(
+            `INSERT INTO sessions
+            (student_id, type_seance, date_seance, duree, note)
+            VALUES (?,?,?,?,?)`,
+            [
+                data.student_id,
+                data.type_seance,
+                data.date_seance,
+                data.duree || 1,
+                data.note || ""
+            ],
+            function(err){
+                if(err) reject(err);
+                else resolve({
+                    success:true,
+                    id:this.lastID
+                })
+            }
+        )
+    })
+});

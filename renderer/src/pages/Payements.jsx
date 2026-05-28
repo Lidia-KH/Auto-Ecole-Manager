@@ -3,14 +3,10 @@ import AddPayementModal from "../components/payements/AddPayementModal";
 import Stat from "../components/payements/Stat";
 import BalanceRow from "../components/payements/BalanceRow";
 import StudentPayementDetail from "../components/payements/StudentPayementDetail";
+import fmt from "../components/payements/fmt";
+import ini from "../components/payements/ini";
 
-function fmt(n) {
-    return Number(n ?? 0).toLocaleString("fr-DZ") + " DZD"
-}
 
-function ini(nom, prenom) {
-    return ((nom?.[0] ?? "") + (prenom?.[0] ?? "")).toUpperCase()
-}
 
 const MOTIFS = [
     { value: "acompte", label: "Acompte inscription" },

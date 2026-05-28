@@ -35,6 +35,11 @@ contextBridge.exposeInMainWorld("api", {
     getFormations: () => 
         ipcRenderer.invoke("formations:getAll"),
     setStudentFormation: (data) =>
-        ipcRenderer.invoke("student_formations:set", data)
+        ipcRenderer.invoke("student_formations:set", data),
+
+    getSessionByStudent: (id) =>
+        ipcRenderer.invoke("sessions:getByStudent", id),
+    addSession: (data) =>
+        ipcRenderer.invoke("sessions:add", data)
     
 });

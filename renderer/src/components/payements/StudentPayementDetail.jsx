@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import fmt from "./fmt";
+import ini from "./ini";
 
 const MOTIFS = [
     { value: "acompte", label: "Acompte inscription" },

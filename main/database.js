@@ -45,6 +45,16 @@ db.serialize(() => {
             formation_id INTEGER NOT NULL REFERENCES formations(id)
         )
     `);
+    db.run(`
+        CREATE TABLE IF NOT EXISTS sessions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER NOT NULL REFERENCES students(id),
+            type_seance TEXT NOT NULL,
+            date_seance TEXT NOT NULL,
+            duree INTEGER DEFAULT 1,
+            note TEXT
+        )    
+    `);
 });
 
 module.exports = db;

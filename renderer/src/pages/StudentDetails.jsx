@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AddPayementModal from "../components/payements/AddPayementModal"
+import AddSessionModal from "../components/sessions/AddSessionModal";
+
+const SEANCE_TYPES = [
+        "code",
+        "créneau",
+        "conduite"
+    ]
 
 function InfoRow( { label, value, mono = false }) {
     return(
@@ -30,6 +37,7 @@ export default function StudentDetails() {
     const navigate = useNavigate();
     const [student, setStudent] = useState(null);
     const [showPayement, setShowPayement] = useState(false);
+    const [showSession, setShowSession] = useState(false)
 
     useEffect(() => {
         async function loadStudent() {
@@ -60,7 +68,7 @@ export default function StudentDetails() {
 
     return (
         <div className="min-h-screen bg-[#f8f9fc] p-8">
-            <div className="max-w-2xl mx-auto space-y-5">
+            <div className="max-w-5xl mx-auto space-y-5">
                 <button 
                 onClick={() => navigate(-1)}
                 className="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-700 transition-colors group">
@@ -109,6 +117,9 @@ export default function StudentDetails() {
 
                     </div>
                 </div>
+                <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
+                    Actions rapides
+                </h2>
 
                 <div className="grid grid-cols-2 gap-3">
                     {[
@@ -126,7 +137,9 @@ export default function StudentDetails() {
                         ${color === "indigo" ? "border-indigo-100 bg-indigo-50 text-indigo-700 hover:bg-indigo-100": ""}
                         ${color === "green" ? "border-green-100 bg-green-50 text-green-700 hover:bg-green-100" : ""}`}
                         onClick={() => {
+                            if(label === "Ajouter une séance") { setShowSession(true) }
                             if(label === "Enregistrer paiement"){ setShowPayement(true) }
+                            
                         }}>
                         
                             <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -138,6 +151,13 @@ export default function StudentDetails() {
                     )}
 
                 </div>
+
+                {showSession && (
+                    <AddSessionModal
+                        student={student}
+                        onClose={() => setShowSession(false)}
+                        onSaved={() => {setShowSession(false)}} />
+                )}
 
                 {showPayement && (
                     <AddPayementModal

@@ -352,3 +352,23 @@ ipcMain.handle("sessions:add", (_, data) => {
         )
     })
 });
+
+ipcMain.handle("session:getAll", () => {
+    return new Promise((resolve, reject) => {
+        db.all(
+            `SELECT sessions.*,
+            students.nom,
+            students.prenom,
+            students.numero
+            FROM sessions
+            JOIN students ON students.id = sessions.student_id
+            ORDER BY date_seance DESC`,
+            [],
+            (err, rows) => {
+                if(err) reject(err);
+                else resolve(rows);
+
+            }
+        )
+    })
+});

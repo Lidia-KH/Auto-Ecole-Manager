@@ -40,6 +40,8 @@ contextBridge.exposeInMainWorld("api", {
     getSessionByStudent: (id) =>
         ipcRenderer.invoke("sessions:getByStudent", id),
     addSession: (data) =>
-        ipcRenderer.invoke("sessions:add", data)
+        ipcRenderer.invoke("sessions:add", data),
+    getAllSessions: () =>
+        ipcRenderer.invoke("sessions:getAll")
     
 });

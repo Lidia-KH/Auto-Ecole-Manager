@@ -8,6 +8,7 @@ export default function Sidebar() {
             <nav className="flex flex-col gap-3">
                 <Link to="/">Tableau de bord</Link>
                 <Link to="/eleves">Élèves</Link>
+                <Link to="/seances">Séances</Link>
                 <Link to="/examens">Examens</Link>
                 <Link to="/paiements">Paiements</Link>
                 <Link to="/parametres">Parametres</Link>

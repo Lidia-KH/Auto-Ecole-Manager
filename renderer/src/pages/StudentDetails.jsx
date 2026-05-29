@@ -28,10 +28,10 @@ function InfoRow( { label, value, mono = false }) {
 }
 
 const STATUS_STYLE = {
-    actif: "bg-emerald-50 text-emerald-700 right-1 ring-emerald-200",
-    terminé: "bg-gray-100 text-gray-500 right-1 ring-gray-200",
-    abandinné: "bg-red-50 text-red-600 right-1 ring-red-200",
-    archivé: "bg-amber-50 text-amber-700 right-1 ring-amber-200",
+    actif: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
+    terminé: "bg-gray-100 text-gray-500 ring-1 ring-gray-200",
+    abandonné: "bg-red-50 text-red-600 ring-1 ring-red-200",
+    archivé: "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
 };
 
 export default function StudentDetails() {

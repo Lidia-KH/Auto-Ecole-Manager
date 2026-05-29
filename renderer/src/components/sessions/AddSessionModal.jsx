@@ -8,8 +8,8 @@ const SEANCE_TYPES = [
 
 export default function AddSessionModal({ student, onClose, onSaved}) {
     const [form, setForm] = useState({
-        type_session: "code",
-        date_session: new Date().toLocaleDateString("sv-SE"),
+        type_seance: "code",
+        date_seance: new Date().toLocaleDateString("sv-SE"),
         duree: "",
         note: "",
     });
@@ -27,8 +27,8 @@ export default function AddSessionModal({ student, onClose, onSaved}) {
 
         await window.api.addSession({
             student_id: student.id,
-            type_seance: form.type_session,
-            date_seance: form.date_session,
+            type_seance: form.type_seance,
+            date_seance: form.date_seance,
             duree: form.duree,
             note: form.note
         })
@@ -69,7 +69,7 @@ export default function AddSessionModal({ student, onClose, onSaved}) {
                         </label>
                         <select
                         className={inputCls}
-                        value={form.type_session}
+                        value={form.type_seance}
                         onChange={e => set("type_seance", e.target.value)}>
                             {SEANCE_TYPES.map(s => (
                                 <option key={s.value} value={s.value}>
@@ -79,16 +79,16 @@ export default function AddSessionModal({ student, onClose, onSaved}) {
                         </select>
                     </div>
                     <div>
-                        <label className="block txt-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">
+                        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">
                             Date
                         </label>
                         <input className={inputCls}
                         type="date"
-                        value={form.date_session}
+                        value={form.date_seance}
                         onChange={e => set("date_seance", e.target.value)} />
                     </div>
                     <div>
-                        <label className="block text-xs font-semi-bold text-gray-400 uppercase tracking-widest mb-1.5">
+                        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">
                             Durée
                         </label>
                         <input className={inputCls}
@@ -98,7 +98,7 @@ export default function AddSessionModal({ student, onClose, onSaved}) {
                         onChange={e => set("duree", e.target.value)} />
                     </div>
                     <div>
-                        <label className="block txt-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">
+                        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">
                             Note (optionnel)
                         </label>
                         <input className={inputCls}
@@ -107,7 +107,7 @@ export default function AddSessionModal({ student, onClose, onSaved}) {
                         onChange={e => set("note", e.target.value)} />
                     </div>
                     <div className="flex gap-3 pt-1">
-                        <button type="button" onClick={onClose} className="flex-1 py-2 text-sm text-gray-500 border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+                        <button type="button" onClick={onClose} className="flex-1 py-2 text-sm text-gray-500 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
                             Annuler
                         </button>
                         <button type="submit" disabled={loading} className="flex-1 py-2 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors disabled:opacity-60">

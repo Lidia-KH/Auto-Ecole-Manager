@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AddPayementModal from "../components/payements/AddPayementModal"
 import AddSessionModal from "../components/sessions/AddSessionModal";
+import SessionStatsCard from "../components/sessions/SessionStatsCard";
+import SessionHistoryCard from "../components/sessions/SessionHistoryCard";
 
 const SEANCE_TYPES = [
         "code",
@@ -37,12 +39,17 @@ export default function StudentDetails() {
     const navigate = useNavigate();
     const [student, setStudent] = useState(null);
     const [showPayement, setShowPayement] = useState(false);
-    const [showSession, setShowSession] = useState(false)
+    const [showSession, setShowSession] = useState(false);
+    const [sessions, setSessions] = useState([])
 
     useEffect(() => {
         async function loadStudent() {
-            const data = await window.api.getStudentById(id);
-            setStudent(data);
+            const [studentData, sessionsData] = await Promise.all([
+                window.api.getStudentById(id),
+                window.api.getSessionByStudent(id)
+            ])
+            setStudent(studentData);
+            setSessions(sessionsData);
             
         }
         loadStudent();
@@ -117,6 +124,10 @@ export default function StudentDetails() {
 
                     </div>
                 </div>
+
+                <SessionStatsCard sessions={sessions} />
+                <SessionHistoryCard sessions={sessions} onAdd={() => setShowSession(true)} />
+
                 <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
                     Actions rapides
                 </h2>
@@ -156,7 +167,11 @@ export default function StudentDetails() {
                     <AddSessionModal
                         student={student}
                         onClose={() => setShowSession(false)}
-                        onSaved={() => {setShowSession(false)}} />
+                        onSaved={async () => {
+                            const updated = await window.api.getSessionByStudent(student.id)
+                            setSessions(updated)
+                            setShowSession(false)
+                        }} />
                 )}
 
                 {showPayement && (

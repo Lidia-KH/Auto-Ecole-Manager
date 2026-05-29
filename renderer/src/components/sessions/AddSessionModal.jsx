@@ -88,6 +88,16 @@ export default function AddSessionModal({ student, onClose, onSaved}) {
                         onChange={e => set("date_seance", e.target.value)} />
                     </div>
                     <div>
+                        <label className="block text-xs font-semi-bold text-gray-400 uppercase tracking-widest mb-1.5">
+                            Durée
+                        </label>
+                        <input className={inputCls}
+                        type="text"
+                        placeholder="1:30"
+                        value={form.duree}
+                        onChange={e => set("duree", e.target.value)} />
+                    </div>
+                    <div>
                         <label className="block txt-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">
                             Note (optionnel)
                         </label>

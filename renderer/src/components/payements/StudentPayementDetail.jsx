@@ -5,7 +5,7 @@ import ini from "./ini";
 const MOTIFS = [
     { value: "acompte", label: "Acompte inscription" },
     { value: "seance", label: "Séance conduite" },
-    { value: "solde", label: "Sold total" },
+    { value: "solde", label: "Solde total" },
     { value: "examen", label: "Frais examen" },
     { value: "autre", label: "Autre" },
 ]

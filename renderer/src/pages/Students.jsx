@@ -1,6 +1,7 @@
 import { couch } from "globals";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import EditStudentModal from "../components/students/EditStudentModal";
  
 
 function Avatar({ nom, prenom, size = "sm" }) {
@@ -54,10 +55,12 @@ const inputCls =
 
 export default function Students() {
     const [students, setStudents] = useState([]);
+    const [formations, setFormations] = useState([]);
     const [search, setSearch] = useState("");
     const navigate = useNavigate();
     const [showForm, setShowForm] = useState(false);
     const [activeFilter, setActiveFilter] = useState("tous");
+    const [editingStudent, setEditingStudent] = useState(null);
 
     const [form, setForm] = useState({
         numero: "",
@@ -67,6 +70,7 @@ export default function Students() {
         telephone: "",
         type_permis: "B",
         status: "actif",
+        formation_id: "",
     });
 
     async function loadStudents(){
@@ -89,12 +93,26 @@ export default function Students() {
 
     useEffect(() => {
         loadStudents();
+
+        async function loadFormations(){
+            const data = await window.api.getFormations();
+            setFormations(data);
+        }
+        loadFormations();
+
     }, []);
 
     async function handleSubmit(e) {
         e.preventDefault();
 
-        await window.api.addStudent(form);
+        const result = await window.api.addStudent(form);
+
+        if (form.formation_id) {
+            await window.api.setStudentFormation({
+                student_id: result.id,
+                formation_id: Number(form.formation_id),
+            });
+        }
 
         setForm({
             numero: "",
@@ -104,6 +122,7 @@ export default function Students() {
             telephone: "",
             type_permis: "B",
             status: "actif",
+            formation_id: "",
         });
         setShowForm(false);
         loadStudents();
@@ -122,9 +141,10 @@ export default function Students() {
 
     const FILTERS = [
         { key:"tous", label:"Tous", count:students.length },
-        { key:"actif", label:"Actifs", couch:students.filter(s => s.status == "actif").length},
-        { key:"terminé", label:"Terminé", couch:students.filter(s => s.status == "terminé").length},
-        { key:"abandonné", label:"Abandonné", couch:students.filter(s => s.status == "abandonné").length}
+        { key:"actif", label:"Actifs", count:students.filter(s => s.status == "actif").length},
+        { key:"terminé", label:"Terminé", count:students.filter(s => s.status == "terminé").length},
+        { key:"abandonné", label:"Abandonné", count:students.filter(s => s.status == "abandonné").length},
+        { key: "archivé", label:"Archivé", count:students.filter(s => s.status == "archivé").length}
     ];
 
     const visible = students.filter(s => activeFilter === "tous" || s.status === activeFilter);
@@ -200,6 +220,21 @@ export default function Students() {
                                         .map(p => <option key={p}>{p}</option>)}
                                     </select>
 
+                                </Field>
+                                <Field label="Formation">
+                                    <select
+                                    className={inputCls}
+                                    value={form.formation_id}
+                                    onChange={e => set("formation_id", e.target.value)}>
+                                        <option value="">
+                                            Choisir une formation
+                                        </option>
+                                        {formations.map(f => (
+                                            <option key={f.id} value={f.id}>
+                                                {f.nom} - {f.prix} DA
+                                            </option>
+                                        ))}
+                                    </select>
                                 </Field>
                                 <Field label="Status">
                                     <select className={inputCls} value={form.status} 
@@ -373,6 +408,23 @@ export default function Students() {
 
                                         </td>
 
+                                        <td className="px-5 py-4">
+                                            <div className="flex items-center gap-2 justify-end">
+                                                <button onClick={e => {e.stopPropagation(); setEditingStudent(s); }}
+                                                    className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-gray-100 text-gray-400"
+                                                    title="Modifier">
+                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                        </svg>
+                                                </button>
+
+                                                <svg className="w-4 h-4 text-gray-200 group-hover:text-400 transition-colors"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                                                </svg>
+                                            </div>
+                                        </td>
+
                                     </tr>
                                 ))}
 
@@ -389,7 +441,17 @@ export default function Students() {
                 )}
                 
             </div>
+            {editingStudent && (
+                <EditStudentModal
+                student={editingStudent}
+                formations={formations ?? []}
+                onClose={() => setEditingStudent(null)}
+                onSaved={() => { setEditingStudent(null); loadStudents();}}
+                onDeleted={() => { setEditingStudent(null); loadStudents();}} 
+                />
+            )}
         </div>
+
                                 
     )                            
 }

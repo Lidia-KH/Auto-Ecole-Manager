@@ -16,6 +16,8 @@ contextBridge.exposeInMainWorld("api", {
         ipcRenderer.invoke("students:delete", id),
     getStudentById: (id) => 
         ipcRenderer.invoke("students:getById", id),
+    updateStudent: (data) => 
+        ipcRenderer.invoke("students:update", data),
 
 
     getPayementsDashboardStats: () =>
@@ -34,6 +36,12 @@ contextBridge.exposeInMainWorld("api", {
         ipcRenderer.invoke("payements:delete", id),
     getFormations: () => 
         ipcRenderer.invoke("formations:getAll"),
+    addFormation:     (data) => 
+        ipcRenderer.invoke("formations:add", data),
+    updateFormation:  (data) => 
+        ipcRenderer.invoke("formations:update", data),
+    deleteFormation:  (id)   => 
+        ipcRenderer.invoke("formations:delete", id),
     setStudentFormation: (data) =>
         ipcRenderer.invoke("student_formations:set", data),
 
@@ -42,6 +50,46 @@ contextBridge.exposeInMainWorld("api", {
     addSession: (data) =>
         ipcRenderer.invoke("sessions:add", data),
     getAllSessions: () =>
-        ipcRenderer.invoke("sessions:getAll")
+        ipcRenderer.invoke("sessions:getAll"),
+    updateSession: (data) => 
+        ipcRenderer.invoke("sessions:update", data),
+    deleteSession: (id) =>
+        ipcRenderer.invoke("sessions:delete", id),
+    getMoniteurs: () =>
+        ipcRenderer.invoke("moniteurs:getAll"),
+    addMoniteur:      (data) => 
+        ipcRenderer.invoke("moniteurs:add", data),
+    deleteMoniteur:   (id)   => 
+        ipcRenderer.invoke("moniteurs:delete", id),
+
+    getVoitures: () =>
+        ipcRenderer.invoke("voitures:getAll"),
+    addVoiture:       (data) => 
+        ipcRenderer.invoke("voitures:add", data),
+    deleteVoiture:    (id)   => 
+        ipcRenderer.invoke("voitures:delete", id),
+
+
+
+    getAllExams: () => 
+        ipcRenderer.invoke("exams:getAll"),
+    getExamsByStudent: (id) => 
+        ipcRenderer.invoke("exams:getByStudent", id),
+    addExam: (data) => 
+        ipcRenderer.invoke("exams:add", data),
+    addExamsBulk: (rows) => 
+        ipcRenderer.invoke("exams:addBulk", rows),
+    updateExam: (data) => 
+        ipcRenderer.invoke("exams:update", data),
+    deleteExam: (id) => 
+        ipcRenderer.invoke("exams:delete", id),
+    getExamsStats: () => 
+        ipcRenderer.invoke("exams:stats"),
+
+
+    sendWhatsappMessage: (payload) =>
+        ipcRenderer.invoke("whatsapp:send", payload),
+
+
     
 });

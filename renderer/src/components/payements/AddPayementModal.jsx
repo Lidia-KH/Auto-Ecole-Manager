@@ -74,7 +74,7 @@ export default function AddPayementModal({ student, onClose, onSaved }) {
                         </select>
                     </div>
                     <div>
-                        <label className="block text-xs font-semibold text-gray-400 uppercase trackong-widest mb-1.5">
+                        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">
                             Date
                         </label>
                         <input className={inputCls} type="date" value={form.date_payement} onChange={e => set("date_payement", e.target.value)} />
@@ -87,11 +87,11 @@ export default function AddPayementModal({ student, onClose, onSaved }) {
                     </div>
                     <div className="flex gap-3 pt-1">
                         <button type="button" onClick={onClose}
-                        className="flex-1 py-2 text-sm tex-gray-500 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+                        className="flex-1 py-2 text-sm text-gray-500 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
                             Annuler
                         </button>
                         <button type="submit" disabled={loading}
-                        className="flex-1 py-2 text-sm font-semibold bg-blue-600 hove:bg-blue-700 text-white rounded-xl transition-colors disabled:opacity-60">
+                        className="flex-1 py-2 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors disabled:opacity-60">
                             {loading ? "Enregistrement..." : "Enregistrer"} 
                         </button>
                     </div>

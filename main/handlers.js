@@ -39,7 +39,7 @@ ipcMain.handle("students:add", async (_, student) => {
             ],
             function (err) {
                 if (err) reject(err);
-                else resolve({ success: true });
+                else resolve({ success: true, id: this.lastID });
             }
         );
     });
@@ -93,7 +93,23 @@ ipcMain.handle("students:getById", async (_, id) => {
     });
 });
 
+ipcMain.handle("students:update", (_, data) =>
+  new Promise((res, rej) =>
+    db.run(
+      `UPDATE students SET numero=?, nom=?, prenom=?, date_de_naissance=?, telephone=?, type_permis=?, status=?, formation_id=?
+       WHERE id=?`,
+      [data.numero, data.nom, data.prenom, data.date_de_naissance, data.telephone, data.type_permis, data.status, data.formation_id, data.id],
+      function (e) {
+        if (e) rej(e)
+        else res({ success: true, id: this.lastID })
+    }
+    )
+  )
+);
+
 // ====== Payement Handlers ======
+
+// formations handlers
 
 ipcMain.handle("formations:getAll", () => {
     return new Promise((resolve, reject) => {
@@ -107,6 +123,33 @@ ipcMain.handle("formations:getAll", () => {
         )
     })
 });
+
+ipcMain.handle("formations:add", (_, { nom, prix, heures }) =>
+  new Promise((res, rej) =>
+    db.run(
+      "INSERT INTO formations (nom, prix, heures) VALUES (?, ?, ?)",
+      [nom, prix, heures || 0],
+      function (e) { e ? rej(e) : res({ success: true, id: this.lastID }) }
+    )
+  )
+);
+ 
+ipcMain.handle("formations:update", (_, { id, prix }) =>
+  new Promise((res, rej) =>
+    db.run("UPDATE formations SET prix = ? WHERE id = ?", [prix, id],
+      e => e ? rej(e) : res({ success: true })
+    )
+  )
+);
+ 
+ipcMain.handle("formations:delete", (_, id) =>
+  new Promise((res, rej) =>
+    db.run("DELETE FROM formations WHERE id = ?", [id],
+      e => e ? rej(e) : res({ success: true })
+    )
+  )
+);
+
 
 // student payements
 
@@ -196,7 +239,7 @@ ipcMain.handle("payements:delete", (_,id) => {
 ipcMain.handle("payements:getBalance", (_, studentId) =>{
     return new Promise((resolve, reject) => {
         db.get(`
-            SELECT f.prix
+            SELECT f.nom, f.prix
             FROM student_formations sf
             JOIN formations f ON f.id = sf.formation_id
             WHERE sf.student_id = ?
@@ -212,7 +255,7 @@ ipcMain.handle("payements:getBalance", (_, studentId) =>{
                 (err2, result) => {
                     if(err2) {reject(err2); return }
                     const total_paye = result.total
-                    resolve({total_prix, total_paye, reste: total_prix - total_paye,})
+                    resolve({formation_nom: formation?.nom ?? "", total_prix, total_paye, reste: total_prix - total_paye,})
                 }
             )
         })
@@ -229,7 +272,7 @@ ipcMain.handle("payements:dashboardStats", () => {
         const results = {}
 
         db.get(
-            "SELECT COALESCE(SUM(montant),0) as total FROM payements WHERE date_payement = ?",
+            "SELECT COALESCE(SUM(montant),0) as total FROM payements WHERE date_payement >= ?",
             [today],
             (err, r) => {
                 if(err) {reject(err); return}
@@ -333,13 +376,16 @@ ipcMain.handle("sessions:add", (_, data) => {
     return new Promise((resolve, reject) => {
         db.run(
             `INSERT INTO sessions
-            (student_id, type_seance, date_seance, duree, note)
-            VALUES (?,?,?,?,?)`,
+            (student_id, type, date_seance, heure, duree, moniteur, voiture, note)
+            VALUES (?,?,?,?,?,?,?,?)`,
             [
                 data.student_id,
-                data.type_seance,
+                data.type_seance || data.type || 'code',
                 data.date_seance,
+                data.heure,
                 data.duree || 1,
+                data.moniteur || "",
+                data.voiture || "",
                 data.note || ""
             ],
             function(err){
@@ -353,7 +399,7 @@ ipcMain.handle("sessions:add", (_, data) => {
     })
 });
 
-ipcMain.handle("session:getAll", () => {
+ipcMain.handle("sessions:getAll", () => {
     return new Promise((resolve, reject) => {
         db.all(
             `SELECT sessions.*,
@@ -371,4 +417,209 @@ ipcMain.handle("session:getAll", () => {
             }
         )
     })
+});
+
+// update & delete seances 
+ipcMain.handle("sessions:update", (_, data) =>
+  new Promise((res, rej) =>
+    db.run(
+      `UPDATE sessions SET type_seance=?, date_seance=?, heure=?, duree=?, moniteur=?, voiture=?, note=?
+       WHERE id=?`,
+      [data.type_seance, data.date_seance, data.heure, data.duree, data.moniteur, data.voiture, data.note, data.id],
+      e => e ? rej(e) : res({ success: true })
+    )
+  )
+);
+
+ipcMain.handle("sessions:delete", (_, id) =>
+  new Promise((res, rej) =>
+    db.run("DELETE FROM sessions WHERE id=?", [id], e => e ? rej(e) : res({ success: true }))
+  )
+);
+
+// === moniteurs handlers ===
+ 
+ipcMain.handle("moniteurs:getAll", () =>
+  new Promise((res, rej) =>
+    db.all("SELECT * FROM moniteurs ORDER BY nom ASC", [], (e, r) => e ? rej(e) : res(r))
+  )
+);
+ 
+ipcMain.handle("moniteurs:add", (_, { nom }) =>
+  new Promise((res, rej) =>
+    db.run("INSERT INTO moniteurs (nom) VALUES (?)", [nom],
+      function (e) { e ? rej(e) : res({ success: true, id: this.lastID }) }
+    )
+  )
+);
+ 
+ipcMain.handle("moniteurs:delete", (_, id) =>
+  new Promise((res, rej) =>
+    db.run("DELETE FROM moniteurs WHERE id = ?", [id],
+      e => e ? rej(e) : res({ success: true })
+    )
+  )
+);
+
+
+// === voitures handlers ===
+ 
+ipcMain.handle("voitures:getAll", () =>
+  new Promise((res, rej) =>
+    db.all("SELECT * FROM voitures ORDER BY immatriculation ASC", [], (e, r) => e ? rej(e) : res(r))
+  )
+);
+ 
+ipcMain.handle("voitures:add", (_, { immatriculation }) =>
+  new Promise((res, rej) =>
+    db.run("INSERT INTO voitures (immatriculation) VALUES (?)", [immatriculation],
+      function (e) { e ? rej(e) : res({ success: true, id: this.lastID }) }
+    )
+  )
+);
+ 
+ipcMain.handle("voitures:delete", (_, id) =>
+  new Promise((res, rej) =>
+    db.run("DELETE FROM voitures WHERE id = ?", [id],
+      e => e ? rej(e) : res({ success: true })
+    )
+  )
+);
+
+
+// === EXAMA HANDLERS ===
+ipcMain.handle("exams:getAll", () => {
+  return new Promise((resolve, reject) => {
+    db.all(
+      `SELECT e.*, s.nom, s.prenom, s.numero, s.telephone
+       FROM exams e
+       JOIN students s ON s.id = e.student_id
+       ORDER BY e.date_examen DESC`,
+      [],
+      (err, rows) => { if (err) reject(err); else resolve(rows) }
+    )
+  })
+});
+
+ipcMain.handle("exams:getByStudent", (_, studentId) => {
+  return new Promise((resolve, reject) => {
+    db.all(
+      `SELECT * FROM exams
+       WHERE student_id = ?
+       ORDER BY date_examen DESC`,
+      [studentId],
+      (err, rows) => { if (err) reject(err); else resolve(rows) }
+    )
+  })
+});
+
+// add one exam
+ipcMain.handle("exams:add", (_, data) => {
+  return new Promise((resolve, reject) => {
+    db.run(
+      `INSERT INTO exams (student_id, type_examen, date_examen, heure, lieu, resultat, note)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        data.student_id,
+        data.type_examen,
+        data.date_examen,
+        data.heure   || null,
+        data.lieu    || null,
+        data.resultat || "en_attente",
+        data.note    || null,
+      ],
+      function (err) { if (err) reject(err); else resolve({ success: true, id: this.lastID }) }
+    )
+  })
+});
+
+// add multiple exams at once 
+ipcMain.handle("exams:addBulk", (_, rows) => {
+  return new Promise((resolve, reject) => {
+    const stmt = db.prepare(
+      `INSERT INTO exams (student_id, type_examen, date_examen, heure, lieu, resultat, note)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`
+    )
+    db.serialize(() => {
+      db.run("BEGIN")
+      let error = null
+      for (const d of rows) {
+        stmt.run(
+          [d.student_id, d.type_examen, d.date_examen, d.heure || null,
+           d.lieu || null, d.resultat || "en_attente", d.note || null],
+          (err) => { if (err) error = err }
+        )
+      }
+      stmt.finalize()
+      if (error) {
+        db.run("ROLLBACK")
+        reject(error)
+      } else {
+        db.run("COMMIT")
+        resolve({ success: true, count: rows.length })
+      }
+    })
+  })
+});
+
+// update exam (edit details OR set result)
+ipcMain.handle("exams:update", (_, data) => {
+  return new Promise((resolve, reject) => {
+    db.run(
+      `UPDATE exams
+       SET type_examen=?, date_examen=?, heure=?, lieu=?, resultat=?, note=?
+       WHERE id=?`,
+      [data.type_examen, data.date_examen, data.heure || null,
+       data.lieu || null, data.resultat, data.note || null, data.id],
+      (err) => { if (err) reject(err); else resolve({ success: true }) }
+    )
+  })
+});
+ 
+// delete exam
+ipcMain.handle("exams:delete", (_, id) => {
+  return new Promise((resolve, reject) => {
+    db.run("DELETE FROM exams WHERE id=?", [id],
+      (err) => { if (err) reject(err); else resolve({ success: true }) }
+    )
+  })
+});
+
+// dashboard stats for exams page
+ipcMain.handle("exams:stats", () => {
+  return new Promise((resolve, reject) => {
+    const today      = new Date().toLocaleDateString("sv-SE")
+    const dayOfWeek  = new Date().getDay()
+    const monday     = new Date()
+    monday.setDate(monday.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
+    const sunday     = new Date(monday); sunday.setDate(monday.getDate() + 6)
+    const weekStart  = monday.toLocaleDateString("sv-SE")
+    const weekEnd    = sunday.toLocaleDateString("sv-SE")
+    const monthStart = today.slice(0, 7) + "-01"
+ 
+    db.all(
+      `SELECT
+        COUNT(*) as total,
+        SUM(CASE WHEN resultat = 'en_attente' AND date_examen >= ? THEN 1 ELSE 0 END) as upcoming,
+        SUM(CASE WHEN resultat = 'reussi'     THEN 1 ELSE 0 END) as reussis,
+        SUM(CASE WHEN resultat = 'echoue'     THEN 1 ELSE 0 END) as echoues,
+        SUM(CASE WHEN resultat = 'absent'     THEN 1 ELSE 0 END) as absents,
+        SUM(CASE WHEN date_examen BETWEEN ? AND ? THEN 1 ELSE 0 END) as this_week,
+        SUM(CASE WHEN date_examen >= ?           THEN 1 ELSE 0 END) as this_month
+       FROM exams`,
+      [today, weekStart, weekEnd, monthStart],
+      (err, rows) => { if (err) reject(err); else resolve(rows[0]) }
+    )
+  })
+});
+
+// Whatsapp sending messages
+ipcMain.handle("whatsapp:send", async (_, { phone, message }) => {
+  const cleanPhone = phone.replace(/\D/g, "");
+
+  const url =
+    `https://wa.me/${cleanPhone}` +
+    `?text=${encodeURIComponent(message)}`;
+
+  await shell.openExternal(url);
 });

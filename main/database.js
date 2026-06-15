@@ -18,9 +18,11 @@ db.serialize(() => {
             telephone TEXT,
             type_permis TEXT,
             status TEXT DEFAULT 'actif',
-            date_inscription TEXT
+            date_inscription TEXT,
+            formation_id INTEGER NOT NULL REFERENCES formations(id)
         )
     `);
+
     db.run(`
         CREATE TABLE IF NOT EXISTS payements (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,9 +37,11 @@ db.serialize(() => {
         CREATE TABLE IF NOT EXISTS formations (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nom TEXT NOT NULL,
-            prix INTEGER NOT NULL        
+            prix INTEGER NOT NULL,
+            heures INTEGER DEFAULT 0      
         )
     `);
+
     db.run(`
         CREATE TABLE IF NOT EXISTS student_formations (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,15 +49,43 @@ db.serialize(() => {
             formation_id INTEGER NOT NULL REFERENCES formations(id)
         )
     `);
+
     db.run(`
         CREATE TABLE IF NOT EXISTS sessions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             student_id INTEGER NOT NULL REFERENCES students(id),
             type_seance TEXT NOT NULL,
             date_seance TEXT NOT NULL,
+            heure TEXT,
             duree INTEGER DEFAULT 1,
+            moniteur TEXT,
+            voiture TEXT,
             note TEXT
         )    
+    `);
+    db.run(`
+        CREATE TABLE IF NOT EXISTS moniteurs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nom TEXT NOT NULL
+    )`);
+
+    db.run(`
+        CREATE TABLE IF NOT EXISTS voitures (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        immatriculation TEXT NOT NULL
+    )`);
+    db.run(`
+        CREATE TABLE IF NOT EXISTS exams (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        student_id INTEGER NOT NULL REFERENCES students(id),
+        type_examen TEXT NOT NULL,
+        date_examen TEXT NOT NULL,
+        heure TEXT,
+        lieu TEXT,
+        resultat TEXT DEFAULT 'en_attente',
+        note TEXT,
+        created_at TEXT DEFAULT (datetime('now'))
+        )
     `);
 });
 

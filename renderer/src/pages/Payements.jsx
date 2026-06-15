@@ -260,10 +260,10 @@ export default function Payements(){
                                     ) : (
                                         visibleBalances.map(s => (
                                             <BalanceRow 
-                                            key={s.id}
-                                            s={s}
-                                            onPlay={setPayingFor}
-                                            onClick={() => setDetailId(s.id)}/>
+                                                key={s.id}
+                                                s={s}
+                                                onPlay={setPayingFor}
+                                                onClick={() => setDetailId(s.id)}/>
                                         ))
                                     )}
                                 </tbody>

@@ -48,7 +48,7 @@ export default function BalanceRow({ s, onPlay, onClick }) {
             <td className="px-5 py-3">
                 <div className="flex items-center gap-2">
                     <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden min-w-12">
-                        <div className="h-full rounded-full bg-emerald-500 transition-all" style={{width: `${pct}`}} />
+                        <div className="h-full rounded-full bg-emerald-500 transition-all" style={{width: `${pct}%`}} />
                     </div>
                     <span className={`text-xs font-semibold ${s.reste > 0 ? "text-red-600" : "text-emerald-700"}`}>
                         {s.reste > 0 ? fmt(s.reste) : "Soldé"}
@@ -63,7 +63,7 @@ export default function BalanceRow({ s, onPlay, onClick }) {
             </td>
             <td className="px-5 py-3">
                 <button
-                onClick={e => {e.stopPropagation(); onPlay(e)}} 
+                onClick={e => {e.stopPropagation(); onPlay(s)}} 
                 className="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg">
                     + Paiement
 

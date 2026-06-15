@@ -3,17 +3,12 @@ import { useNavigate } from "react-router-dom";
 import SessionStatsCard from "../components/sessions/SessionStatsCard";
 import ini from "../components/payements/ini";
 import AddSessionModal from "../components/sessions/AddSessionModal";
+import EditSessionModal from "../components/sessions/EditSessionModal";
 
-function formatDate(str) {
-    if (!str) return "-";
-    const d = new Date(str);
-    if (isNaN(d)) return str;
-    return d.toLocaleDateString("fr-DZ")
-}
 
 const TYPE_STYLE = {
     code: "bg-amber-50 text-amber-700 border border-amber-100",
-    céneau: "bg-purple-50 text-purple-700 border border-purple-100",
+    créneau: "bg-purple-50 text-purple-700 border border-purple-100",
     conduite: "bg-blue-50 text-blue-700 border border-blue-100",
 };
 
@@ -21,8 +16,15 @@ const FILTERS = [
     {key: "tous", label: "Tous"},
     {key: "code", label: "Code"},
     {key: "créneau", label: "Créneau"},
-    {key: "conduite", label: "onduite"}
+    {key: "conduite", label: "Conduite"}
 ]
+
+function fmtDate(str) {
+  if (!str) return "—"
+  const d = new Date(str)
+  if (isNaN(d)) return str
+  return d.toLocaleDateString("fr-DZ", { day: "2-digit", month: "short", year: "numeric" })
+}
 
 export default function Sessions() {
     const navigate = useNavigate();
@@ -30,6 +32,7 @@ export default function Sessions() {
     const [search, setSearch] = useState("");
     const [filterType, setFilterType] = useState("tous");
     const [showModal, setShowModal] = useState(false);
+    const [editingSession, setEditingSession] = useState(null);
 
     async function loadSessions() {
         const data = await window.api.getAllSessions();
@@ -61,6 +64,14 @@ export default function Sessions() {
         return matchSearch && matchType;
     });
 
+    async function handleDelete(id) {
+        if (!window.confirm("Supprimer cet séance ?")) 
+            return;
+        await window.api.deleteSession(id);
+        loadAll();
+        
+    }
+
     return (
         <div className="min-h-screen bg-[#f8f9fc] p-8">
 
@@ -77,14 +88,15 @@ export default function Sessions() {
                             {sessions.length} séance{sessions.length !== 1 ? "s":" "} enregistrée{sessions.length !== 1 ? "s":" "}
                         </p>
                     </div>
-                    {/* <button
+                    <button
                     onClick={() => setShowModal(true)}
                     className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-sm font-semibold rounded-xl transition-all shadow-sm shadow-blue-200">
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                         </svg>
                         Ajouter une séance
-                    </button> */}
+                    </button>
+                    
 
                 </div>
 
@@ -161,14 +173,16 @@ export default function Sessions() {
                         <thead>
                             <tr className="border-b border-gray-50">
 
-                                {["Date", "Élève", "Type", "Durée", "Note"].map(h => (
+                                {["Date", "Heure", "Élève", "Type", "Durée", "Moniteur", "Voiture", "Note"].map(h => (
                                     <th
                                     key={h}
                                     className="px-5 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-widest"
                                     >
-                                        {h}
+                                    {h}
                                     </th>
                                 ))}
+                                
+                                
 
                             </tr>
                         </thead>
@@ -184,12 +198,15 @@ export default function Sessions() {
                                 >
 
                                     <td className="px-5 py-4 text-sm text-gray-600 whitespace-nowrap">
-                                        {formatDate(s.date_seance)}
+                                        {fmtDate(s.date_seance)}
+                                    </td>
+                                    <td className="px-5 py-4 text-sm text-gray-600 whitespace-nowrap">
+                                        {s.heure || "—"}
                                     </td>
 
                                     <td className="px-5 py-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 text-xs font-semibold flex items-center justify-cinter flex-shrink-0">
+                                            <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 text-xs font-semibold flex items-center justify-center flex-shrink-0">
                                                 {ini(s.nom, s.prenom)}
                                             </div>
                                         
@@ -207,12 +224,18 @@ export default function Sessions() {
 
                                     <td className="px-5 py-4">
                                         <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${TYPE_STYLE[s.type_seance] ?? TYPE_STYLE.conduite}`}>
-                                            {s.type_seance}
+                                            {s.type}
                                         </span>
                                     </td>
 
                                     <td className="px-5 py-4 text-sm text-gray-600">
                                         {s.duree ? `${s.duree} min` : "—"}
+                                    </td>
+                                    <td className="px-5 py-4 text-sm text-gray-500">
+                                        {s.moniteur || "—"}
+                                    </td>
+                                    <td className="px-5 py-4 text-sm text-gray-500">
+                                        {s.voiture || "—"}
                                     </td>
 
                                     <td className="px-5 py-4 text-sm text-gray-400 max-w-xs truncate">
@@ -220,10 +243,33 @@ export default function Sessions() {
                                     </td>
 
                                     <td className="px-5 py-4">
-                                        <svg className="w-4 h-4 text-gray-200 group-hover:text-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                                        </svg>
+                                        <div className="flex items-center gap-2 justify-end">
+                                            <button
+                                                onClick={e => {e.stopPropagation(); handleDelete(s.id);}}
+                                                className="p-1.5 rounded-lg hover:bg-red-50 text-gray-300 hover:text-red-500 transition-colors"
+                                                title="Supprimer">
+                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+
+                                            </button>
+
+                                            <button onClick={e => { e.stopPropagation(); setEditingSession(s); }}
+                                            className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-gray-100 text-gray-400"
+                                            title="Modifier">
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                            </button>
+                                        
+                                            <svg className="w-4 h-4 text-gray-200 group-hover:text-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                                            </svg>
+                                            
+                                        </div>
+                                        
                                     </td>
+
 
                                 </tr>
 
@@ -234,15 +280,14 @@ export default function Sessions() {
                     </table>
                     )}
 
-                    {visibleSessions.length > 0 && (
-                        <div className="px-5 py-3 border-t border-gray-50 bg-gray-50/50">
-                            <span className="text-xs text-gray-400">
-                                {visibleSessions.length} séance{visibleSessions.length !==1 ? "s" : " "} affichée{visibleSessions.length !== 1 ? "s" : " "}
-                            </span>
-                        </div>
-                    )}
-
                 </div>
+                {visibleSessions.length > 0 && (
+                    <div className="text-xs text-gray-400 text-right">
+                        <span className="text-xs text-gray-400">
+                            {visibleSessions.length} séance{visibleSessions.length !==1 ? "s" : " "} affichée{visibleSessions.length !== 1 ? "s" : " "}
+                        </span>
+                    </div>
+                )}
 
             </div>
 
@@ -251,6 +296,14 @@ export default function Sessions() {
                 student={null}
                 onClose={() => setShowModal(false)}
                 onSaved={() => { setShowModal(false); loadSessions(); }} />
+            )}
+            {editingSession && (
+                <EditSessionModal
+                    session={editingSession}
+                    onClose={() => setEditingSession(null)}
+                    onSaved={() => { setEditingSession(null); loadSessions(); }}
+                    onDeleted={() => { setEditingSession(null); loadSessions(); }}
+                />
             )}
 
         </div>

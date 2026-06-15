@@ -4,12 +4,11 @@ import AddPayementModal from "../components/payements/AddPayementModal"
 import AddSessionModal from "../components/sessions/AddSessionModal";
 import SessionStatsCard from "../components/sessions/SessionStatsCard";
 import SessionHistoryCard from "../components/sessions/SessionHistoryCard";
-
-const SEANCE_TYPES = [
-        "code",
-        "créneau",
-        "conduite"
-    ]
+import PayementCard from "../components/payements/PayementCard";
+import ExamStatsCard from "../components/exams/ExamStatsCard";
+import StudentExamHistoryCard from "../components/exams/StudentExamHistoryCard";
+import AddExamenModal from "../components/exams/AddExamsModal";
+import EditExamenModal from "../components/exams/EditExamModal";
 
 function InfoRow( { label, value, mono = false }) {
     return(
@@ -34,22 +33,41 @@ const STATUS_STYLE = {
     archivé: "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
 };
 
+
+const COLOR_MAP = {
+  blue:    "border-blue-100    bg-blue-50    text-blue-700    hover:bg-blue-100",
+  emerald: "border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
+  indigo:  "border-indigo-100  bg-indigo-50  text-indigo-700  hover:bg-indigo-100",
+  green:   "border-green-100   bg-green-50   text-green-700   hover:bg-green-100",
+};
+
+
 export default function StudentDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [student, setStudent] = useState(null);
     const [showPayement, setShowPayement] = useState(false);
     const [showSession, setShowSession] = useState(false);
-    const [sessions, setSessions] = useState([])
+    const [sessions, setSessions] = useState([]);
+    const [payementKey, setPayementKey] = useState(0);
+    const [exams, setExams] = useState([]);
+    const [showExam, setShowExam] = useState(false);
+    const [editingExam, setEditingExam] = useState(null);
+    const [showWhatsapp, setShowWhatsapp] = useState(false);
+    const [whatsappMessage, setWhatsappMessage] = useState(
+    `Bonjour ${student?.nom ?? ""} ${student?.prenom ?? ""}, je vous contacte depuis l'auto-école.`
+    );
 
     useEffect(() => {
         async function loadStudent() {
-            const [studentData, sessionsData] = await Promise.all([
+            const [studentData, sessionsData, examsData] = await Promise.all([
                 window.api.getStudentById(id),
-                window.api.getSessionByStudent(id)
+                window.api.getSessionByStudent(id),
+                window.api.getExamsByStudent(id)
             ])
             setStudent(studentData);
             setSessions(sessionsData);
+            setExams(examsData);
             
         }
         loadStudent();
@@ -72,6 +90,40 @@ export default function StudentDetails() {
     }
 
     const initials = ((student.nom?.[0] ?? "") + (student.prenom?.[0] ?? "")).toUpperCase();
+
+      const ACTION_BUTTONS = [
+        {
+        label: "Ajouter une séance",
+        color: "blue",
+        icon: "M12 6v6m0 0v6m0-6h6m-6 0H6",
+        onClick: () => setShowSession(true),
+        },
+        {
+        label: "Enregistrer paiement",
+        color: "emerald",
+        icon: "M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z",
+        onClick: () => setShowPayement(true),
+        },
+        {
+        label: "Inscrire à un examen",
+        color: "indigo",
+        icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
+        onClick: () => setShowExam(true),
+        },
+        {
+        label: "Notifier WhatsApp",
+        color: "green",
+        icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z",
+        onClick: () => {
+            setWhatsappMessage(
+                `Bonjour ${student.nom} ${student.prenom}, je vous contacte depuis l'auto-école.`
+            );
+
+            setShowWhatsapp(true);
+        },
+        },
+    ]
+
 
     return (
         <div className="min-h-screen bg-[#f8f9fc] p-8">
@@ -110,78 +162,158 @@ export default function StudentDetails() {
 
                 </div>
 
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
-                    <div className="px-6 pt-5 pb-1">
-                        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
-                            Informations
-                        </h2>
-                    </div>
-                    <div className="px-6 pb-4">
-                        <InfoRow label="Téléphone" value={student.telephone} />
-                        <InfoRow label="Permis" value={`Type ${student.type_permis}`} />
-                        <InfoRow label="Date de naissance" value={student.date_de_naissance} />
-                        <InfoRow label="Date d'inscription" value={student.date_inscription?.split("T")[0]} />
 
-                    </div>
-                </div>
+                <div className="grid grid-cols-2 gap-5">
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
+                        <div className="px-6 pt-5 pb-1">
+                            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
+                                Informations
+                            </h2>
+                        </div>
+                        <div className="px-6 pb-4">
+                            <InfoRow label="Téléphone" value={student.telephone} />
+                            <InfoRow label="Permis" value={`Type ${student.type_permis}`} />
+                            <InfoRow label="Date de naissance" value={student.date_de_naissance} />
+                            <InfoRow label="Date d'inscription" value={student.date_inscription?.split("T")[0]} />
 
-                <SessionStatsCard sessions={sessions} />
-                <SessionHistoryCard sessions={sessions} onAdd={() => setShowSession(true)} />
-
-                <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
-                    Actions rapides
-                </h2>
-
-                <div className="grid grid-cols-2 gap-3">
-                    {[
-                        { label: "Ajouter une séance", icon: "M12 6v6m0 0v6m0-6h6m-6 0H6", color:"blue" },
-                        { label: "Enregistrer paiement",  icon: "M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z", color: "emerald" },
-                        { label: "Inscrire à un examen",  icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z", color: "indigo" },
-                        { label: "Notifier WhatsApp",     icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z", color: "green"  },
-
-                    ].map(({ label, icon, color}) => (
-                        <button key={label} className={`
-                        flex items-center gap-3 px-4 py-3.5 rounded-xl border text-sm font-medium transition-all 
-                        hover:shadow-sm active:scale-[.98]
-                        ${color === "blue" ? "border-blue-100 bg-blue-50 text-blue-700 hover:bg-blue-100" : ""}
-                        ${color === "emerald" ? "border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-100": ""}
-                        ${color === "indigo" ? "border-indigo-100 bg-indigo-50 text-indigo-700 hover:bg-indigo-100": ""}
-                        ${color === "green" ? "border-green-100 bg-green-50 text-green-700 hover:bg-green-100" : ""}`}
-                        onClick={() => {
-                            if(label === "Ajouter une séance") { setShowSession(true) }
-                            if(label === "Enregistrer paiement"){ setShowPayement(true) }
-                            
-                        }}>
+                        </div>
                         
-                            <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d={icon} />
-                            </svg>
-                            {label}
-                        </button>
-                    )
-                    )}
-
+                    </div>
+                    <PayementCard
+                        key={payementKey}
+                        studentId={student.id}
+                        onAddPayement={() => setShowPayement(true)} />
                 </div>
 
-                {showSession && (
-                    <AddSessionModal
-                        student={student}
-                        onClose={() => setShowSession(false)}
-                        onSaved={async () => {
-                            const updated = await window.api.getSessionByStudent(student.id)
-                            setSessions(updated)
-                            setShowSession(false)
-                        }} />
-                )}
+                <SessionStatsCard 
+                sessions={sessions} 
+                />
+                <SessionHistoryCard 
+                sessions={sessions} 
+                onAdd={() => setShowSession(true)} 
+                />
 
-                {showPayement && (
-                    <AddPayementModal
-                        student={student}
-                        onClose={() => setShowPayement(false)}
-                        onSaved={() => { setShowPayement(false) }} />
-                )}
+                <ExamStatsCard
+                exams={exams} />
 
+                <StudentExamHistoryCard
+                exams={exams}
+                onAdd={() => setShowExam(true)}
+                onEdit={e => setEditingExam(e)} />
+
+                <div>
+                    <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+                        Actions rapides
+                    </h2>
+
+                    <div className="grid grid-cols-2 gap-3">
+                        {ACTION_BUTTONS.map(({ label, icon, color, onClick}) => (
+                            <button key={label} onClick={onClick} className={`
+                            flex items-center gap-3 px-4 py-3.5 rounded-xl border text-sm font-medium transition-all 
+                            hover:shadow-sm active:scale-[.98] ${COLOR_MAP[color]}`}
+                            >
+                            
+                                <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d={icon} />
+                                </svg>
+                                {label}
+                            </button>
+                        )
+                        )}
+
+                    </div>
+                </div>
+
+                
             </div>
+
+            {showSession && (
+                <AddSessionModal
+                    student={student}
+                    onClose={() => setShowSession(false)}
+                    onSaved={async () => {
+                        const updated = await window.api.getSessionByStudent(student.id)
+                        setSessions(updated)
+                        setShowSession(false)
+                    }} />
+            )}
+
+            {showPayement && (
+                <AddPayementModal
+                    student={student}
+                    onClose={() => setShowPayement(false)}
+                    onSaved={() => { setShowPayement(false); setPayementKey(k => k + 1); }} />
+            )}
+
+            {showExam && (
+                <AddExamenModal
+                student={student}
+                onClose={() => setShowExam(false)}
+                onSaved={async () => {
+                    const updated = await window.api.getExamsByStudent(student.id)
+                    setExams(updated)
+                    setShowExam(false)
+                }} />
+            )}
+
+            {editingExam && (
+                <EditExamenModal
+                examen={editingExam}
+                onClose={() => setEditingExam(null)}
+                onSaved={async () => {
+                    const updated = await window.api.getExamsByStudent(student.id)
+                    setExams(updated)
+                    setEditingExam(null)
+                }}
+                onDeleted={async () => {
+                    const updated = await window.api.getExamsByStudent(student.id)
+                    setExams(updated)
+                    setEditingExam(null)
+                }} />
+            )}
+
+            {showWhatsapp && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+                    <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-xl">
+                    <h3 className="text-lg font-semibold mb-4">
+                        Message WhatsApp
+                    </h3>
+
+                    <textarea
+                        rows={8}
+                        value={whatsappMessage}
+                        onChange={(e) => setWhatsappMessage(e.target.value)}
+                        className="w-full border border-gray-200 rounded-xl p-3 resize-none"
+                    />
+
+                    <div className="flex justify-end gap-3 mt-4">
+                        <button
+                        onClick={() => setShowWhatsapp(false)}
+                        className="px-4 py-2 border border-gray-200 rounded-xl"
+                        >
+                        Annuler
+                        </button>
+
+                        <button
+                        onClick={() => {
+                            window.open(
+                            `https://wa.me/${student.telephone}?text=${encodeURIComponent(
+                                whatsappMessage
+                            )}`,
+                            "_blank"
+                            );
+
+                            setShowWhatsapp(false);
+                        }}
+                        className="px-4 py-2 bg-green-600 text-white rounded-xl"
+                        >
+                        Ouvrir WhatsApp
+                        </button>
+                    </div>
+                    </div>
+                </div>
+                )}
+
 
         </div>
     );

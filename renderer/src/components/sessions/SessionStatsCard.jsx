@@ -10,9 +10,9 @@ export default function SessionStatsCard({ sessions = [], label, value, color = 
   if (sessions.length !== undefined && label === undefined) {
     const CARDS = [
       { label: "Total",    value: sessions.length,                                          color: "gray"  },
-      { label: "Conduite", value: sessions.filter(s => s.type_seance === "conduite").length, color: "blue"  },
-      { label: "Créneau", value: sessions.filter(s => s.type_seance === "créneau").length, color: "purple"  },
-      { label: "Code",     value: sessions.filter(s => s.type_seance === "code").length,     color: "amber" },
+      { label: "Conduite", value: sessions.filter(s => s.type === "conduite").length, color: "blue"  },
+      { label: "Créneau", value: sessions.filter(s => s.type === "créneau").length, color: "purple"  },
+      { label: "Code",     value: sessions.filter(s => s.type === "code").length,     color: "amber" },
     ]
     return (
       <div className="grid grid-cols-4 gap-3">

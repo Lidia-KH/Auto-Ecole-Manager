@@ -12,6 +12,7 @@ export default function AddPayementModal({ student, onClose, onSaved }) {
     const [form, setForm] = useState({
         montant: "",
         motif: "acompte",
+        scope: "formation",
         date_payement: new Date().toLocaleDateString("sv-SE"),
         note: ""
     })
@@ -30,6 +31,7 @@ export default function AddPayementModal({ student, onClose, onSaved }) {
             student_id: student.id,
             montant: parseInt(form.montant),
             motif: form.motif,
+            scope: form.scope,
             date_payement: form.date_payement,
             note: form.note
         })
@@ -64,6 +66,22 @@ export default function AddPayementModal({ student, onClose, onSaved }) {
                         *</label>
                         <input className={inputCls} type="number" placeholder="5000" required
                         value={form.montant} onChange={e => set("montant", e.target.value)} />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">
+                            Type de paiement
+                        </label>
+
+                        <select 
+                            className={inputCls}
+                            value={form.scope}
+                            onChange={e => set("scope", e.target.value)}
+                        >
+                            <option value="formation">Formation</option>
+                            <option value="examen">Examen</option>
+                            <option value="seance">Séance</option>
+                            <option value="autre">Autre</option>
+                        </select>
                     </div>
                     <div>
                         <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">

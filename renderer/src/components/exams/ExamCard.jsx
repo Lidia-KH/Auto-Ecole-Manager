@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react"
 import AddExamenModal from "../examens/AddExamenModal"
 import EditExamenModal from "../examens/EditExamenModal"
-import fmt from "../payements/fmt"
+
+function fmtDate(str) {
+  if (!str) return "—"
+  const d = new Date(str)
+  if (isNaN(d)) return str
+  return d.toLocaleDateString("fr-DZ", { day: "2-digit", month: "short", year: "numeric" })
+}
 
 const RESULTAT_STYLE = {
   en_attente: { cls: "bg-gray-100 text-gray-500",        label: "En attente" },
@@ -87,7 +93,7 @@ export default function ExamenCard({ student, refreshKey }) {
                             {e.type_examen}
                           </span>
                           <div>
-                            <p className="text-xs font-medium text-gray-700">{fmt(e.date_examen)}{e.heure ? ` — ${e.heure}` : ""}</p>
+                            <p className="text-xs font-medium text-gray-700">{fmtDate(e.date_examen)}{e.heure ? ` — ${e.heure}` : ""}</p>
                             {e.lieu && <p className="text-xs text-gray-400 mt-0.5">{e.lieu}</p>}
                           </div>
                         </div>

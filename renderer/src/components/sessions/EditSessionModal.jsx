@@ -33,7 +33,7 @@ export default function EditSessionModal({ session, onClose, onSaved, onDeleted 
 
   useEffect(() => {
     setForm({
-      type_seance: session.type_seance ?? "conduite",
+      type: session.type ?? "conduite",
       date_seance: session.date_seance ?? "",
       heure:       session.heure ?? "",
       duree:       session.duree ?? 60,
@@ -105,9 +105,9 @@ export default function EditSessionModal({ session, onClose, onSaved, onDeleted 
           <Field label="Type de séance">
             <div className="flex gap-2">
               {SESSION_TYPES.map(t => (
-                <button key={t} type="button" onClick={() => set("type_seance", t)}
+                <button key={t} type="button" onClick={() => set("type", t)}
                   className={`flex-1 py-2 rounded-xl text-xs font-semibold border capitalize transition-all ${
-                    form.type_seance === t
+                    form.type === t
                       ? `${TYPE_STYLE[t]} ring-2`
                       : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
                   }`}>

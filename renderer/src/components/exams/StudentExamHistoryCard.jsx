@@ -1,4 +1,9 @@
-import fmt from "../payements/fmt"
+function fmtDate(str) {
+  if (!str) return "—"
+  const d = new Date(str)
+  if (isNaN(d)) return str
+  return d.toLocaleDateString("fr-DZ", { day: "2-digit", month: "short", year: "numeric" })
+} 
 
 const RESULTAT = {
   en_attente: { label: "En attente", cls: "bg-gray-100 text-gray-500"          },
@@ -56,7 +61,7 @@ export default function StudentExamHistoryCard({ exams = [], onAdd, onEdit }) {
                     </span>
                     <div>
                       <p className="text-xs font-medium text-gray-700">
-                        {fmt(e.date_examen)}{e.heure ? ` — ${e.heure}` : ""}
+                        {fmtDate(e.date_examen)}{e.heure ? ` — ${e.heure}` : ""}
                       </p>
                       {e.lieu && <p className="text-xs text-gray-400 mt-0.5">{e.lieu}</p>}
                     </div>

@@ -103,9 +103,18 @@ export default function PayementCard({ studentId, onAddPayement }) {
                         {history.slice(0, 4).map(p => (
                             <div key={p.id} className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-xl">
                                 <div>
+
                                     <p className="text-xs font-medium text-gray-700">
                                         {MOTIF_LABEL[p.motif] ?? p.motif}
                                     </p>
+                                    <span className={`
+                                        text-[10px] px-2 py-0.5 rounded-full ml-2
+                                        ${p.scope === "formation" ? "bg-blue-50 text-blue-600" :
+                                        p.scope === "examen" ? "bg-purple-50 text-purple-600" :
+                                        "bg-gray-100 text-gray-500"}
+                                    `}>
+                                        {p.scope}
+                                    </span>
                                     <p className="text-xs text-gray-400 mt-0.5">
                                         {p.date_payement}
                                     </p>

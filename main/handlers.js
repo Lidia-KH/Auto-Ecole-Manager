@@ -156,10 +156,10 @@ ipcMain.handle("formations:delete", (_, id) =>
 ipcMain.handle("student_formations:getByStudent", (_,studentId) => {
     return new Promise((resolve, reject) => {
         db.get(
-            `SELECT sf.*, f.nom, f.prix
-            FROM student_formations sf
-            JOIN formations f ON f.id = sf.formation_id
-            WHERE sf.student_id = ?`,
+            `SELECT s.*, f.nom, f.prix
+            FROM students s
+            JOIN formations f ON f.id = s.formation_id
+            WHERE s.id = ?`,
             [studentId],
             (err, row) => {
                 if(err) reject(err);
@@ -169,24 +169,17 @@ ipcMain.handle("student_formations:getByStudent", (_,studentId) => {
     })
 });
 
-ipcMain.handle("student_formations:set", (_, {student_id, formation_id}) =>{
+ipcMain.handle("student_formations:set", (_, { student_id, formation_id }) => {
     return new Promise((resolve, reject) => {
         db.run(
-            "DELETE FROM student_formations WHERE student_id = ?",
-            [student_id],
-            (err) => {
-                if (err) {reject(err); return}
-                db.run(
-                    "INSERT INTO student_formations (student_id, formation_id) VALUES (?,?)",
-                    [student_id, formation_id],
-                    function (err) {
-                        if (err) reject(err)
-                        else resolve({ success: true })
-                    }
-                )
+            "UPDATE students SET formation_id = ? WHERE id = ?",
+            [formation_id, student_id],
+            function (err) {
+                if (err) reject(err);
+                else resolve({ success: true });
             }
-        )
-    })
+        );
+    });
 });
 
 // global payements related
@@ -207,13 +200,14 @@ ipcMain.handle("payements:getByStudent", (_, studentId) => {
 ipcMain.handle("payements:add", (_, data) => {
     return new Promise((resolve, reject) => {
         db.run(`
-            INSERT INTO payements (student_id, montant, motif, date_payement, note)
-            VALUES (?,?,?,?,?)
+            INSERT INTO payements (student_id, montant, motif, scope, date_payement, note)
+            VALUES (?,?,?,?,?,?)
             `,
         [
             data.student_id,
             data.montant, 
             data.motif || "autre", 
+            data.scope || "formation",
             data.date_payement || new Date().toLocaleDateString("sv-SE"), 
             data.note || ""
         ],
@@ -240,9 +234,9 @@ ipcMain.handle("payements:getBalance", (_, studentId) =>{
     return new Promise((resolve, reject) => {
         db.get(`
             SELECT f.nom, f.prix
-            FROM student_formations sf
-            JOIN formations f ON f.id = sf.formation_id
-            WHERE sf.student_id = ?
+            FROM students s
+            JOIN formations f ON f.id = s.formation_id
+            WHERE s.id = ?
             `,
         [studentId],
         (err, formation) => {
@@ -250,7 +244,7 @@ ipcMain.handle("payements:getBalance", (_, studentId) =>{
             const total_prix = formation?.prix ?? 0
 
             db.get(
-                "SELECT COALESCE(SUM(montant),0) as total FROM payements WHERE student_id = ?",
+                "SELECT COALESCE(SUM(montant),0) as total FROM payements WHERE student_id = ? AND scope = 'formation'",
                 [studentId],
                 (err2, result) => {
                     if(err2) {reject(err2); return }
@@ -272,14 +266,14 @@ ipcMain.handle("payements:dashboardStats", () => {
         const results = {}
 
         db.get(
-            "SELECT COALESCE(SUM(montant),0) as total FROM payements WHERE date_payement >= ?",
+            "SELECT COALESCE(SUM(montant),0) as total FROM payements WHERE date_payement >= ? AND scope = 'formation'",
             [today],
             (err, r) => {
                 if(err) {reject(err); return}
                 results.today = r.total
 
                 db.get(
-                    "SELECT COALESCE(SUM(montant),0) as total FROM payements WHERE date_payement = ?",
+                    "SELECT COALESCE(SUM(montant),0) as total FROM payements WHERE date_payement = ? AND scope = 'formation'",
                     [firstMonth],
                     (err2, r2) => {
                         if(err2) {reject(err2); return}
@@ -288,8 +282,7 @@ ipcMain.handle("payements:dashboardStats", () => {
                         db.all(
                             `SELECT s.id, s.numero, s.nom, s.prenom, f.prix, COALESCE(SUM(p.montant),0) as total_paye
                             FROM students s
-                            JOIN student_formations sf ON sf.student_id = s.id
-                            JOIN formations f ON f.id = sf.formation_id
+                            JOIN formations f ON f.id = s.formation_id
                             LEFT JOIN payements p ON p.student_id = s.id
                             GROUP BY s.id
                             HAVING f.prix - total_paye > 0
@@ -320,6 +313,7 @@ ipcMain.handle("payements:monthlyRevenue", () => {
         db.all(
             `SELECT strftime('%Y-%m', date_payement) as month, SUM(montant) as total
             FROM payements
+            WHERE scope = 'formation'
             GROUP BY month
             ORDER BY month DESC
             LIMIT 6`,
@@ -338,9 +332,8 @@ ipcMain.handle("payements:allBalances", () =>{
             `SELECT s.id, s.numero, s.nom, s.prenom, s.telephone,
             f.nom as formation_nom, f.prix, COALESCE(SUM(p.montant),0) as total_paye
             FROM students s
-            LEFT JOIN student_formations sf ON sf.student_id = s.id
-            LEFT JOIN formations f ON f.id = sf.formation_id
-            LEFT JOIN payements p ON p.student_id = s.id
+            LEFT JOIN formations f ON f.id = s.formation_id
+            LEFT JOIN payements p ON p.student_id = s.id AND p.scope = 'formation'
             GROUP BY s.id
             ORDER BY (f.prix - COALESCE(SUM(p.montant),0)) DESC`,
             [],
@@ -350,6 +343,28 @@ ipcMain.handle("payements:allBalances", () =>{
                     ...r,
                     reste: (r.prix ?? 0) - r.total_paye,
                 })))
+            }
+        )
+    })
+});
+
+ipcMain.handle("payements:update", (_, data) => {
+    return new Promise((resolve, reject) => {
+        db.run(
+            `UPDATE payements 
+             SET montant=?, motif=?, scope=?, date_payement=?, note=?
+             WHERE id=?`,
+            [
+                data.montant,
+                data.motif,
+                data.scope,
+                data.date_payement,
+                data.note,
+                data.id
+            ],
+            function(err) {
+                if (err) reject(err)
+                else resolve({ success: true })
             }
         )
     })

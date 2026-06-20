@@ -12,6 +12,14 @@ dist
 dist-ssr
 *.local
 
+main
+main/database
+main/handlers
+main/main
+
+preload
+preload/preload
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -22,3 +30,4 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+

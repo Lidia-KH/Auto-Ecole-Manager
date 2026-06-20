@@ -28,7 +28,7 @@ export default function SessionHistoryCard({sessions=[], onAdd}) {
                             className="flex items-center justify-between px-4 py-3 rounded-xl bg-gray-50">
                                 <div>
                                     <p className="text-sm font-medium text-gray-700 capitalize">
-                                        {s.type_seance}
+                                        {s.type}
                                     </p>
                                     <p className="text-xs text-gray-400 mt-0.5">
                                         {s.date_seance}

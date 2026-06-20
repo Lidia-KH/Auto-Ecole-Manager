@@ -109,7 +109,7 @@ function StudentPicker({ value, onChange, exclude = [] }) {
 function SingleForm({ prefillStudent, moniteurs, voitures, onSubmit, onClose }) {
   const [form, setForm] = useState({
     student:      prefillStudent ?? null,
-    type_seance:  "conduite",
+    type:  "conduite",
     date_seance:  new Date().toLocaleDateString("sv-SE"),
     heure:        "09:00",
     duree:        60,
@@ -127,7 +127,7 @@ function SingleForm({ prefillStudent, moniteurs, voitures, onSubmit, onClose }) 
     setLoading(true);
     await window.api.addSession({
       student_id:  form.student.id,
-      type_seance: form.type_seance,
+      type: form.type,
       date_seance: form.date_seance,
       heure:       form.heure,
       duree:       form.duree,
@@ -139,7 +139,7 @@ function SingleForm({ prefillStudent, moniteurs, voitures, onSubmit, onClose }) 
       if (notifyWhatsapp && form.student.telephone) {
         const msg =
           `Bonjour ${form.student.nom} ${form.student.prenom},\n\n` +
-          `Votre séance de ${form.type_seance} est programmée le ${form.date_seance} à ${form.heure}.\n\n` +
+          `Votre séance de ${form.type} est programmée le ${form.date_seance} à ${form.heure}.\n\n` +
           `Auto-école.`;
 
         window.open(
@@ -179,9 +179,9 @@ function SingleForm({ prefillStudent, moniteurs, voitures, onSubmit, onClose }) 
           {SESSION_TYPES.map(t => (
             <button
               key={t} type="button"
-              onClick={() => set("type_seance", t)}
+              onClick={() => set("type", t)}
               className={`flex-1 py-2 rounded-xl text-xs font-semibold border capitalize transition-all ${
-                form.type_seance === t
+                form.type === t
                   ? `${TYPE_STYLE[t]} ring-2`
                   : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
               }`}
@@ -261,7 +261,7 @@ function SingleForm({ prefillStudent, moniteurs, voitures, onSubmit, onClose }) 
 // ── Bulk mode form ────────────────────────────────────────────────
 function BulkForm({ moniteurs, voitures, onSubmit, onClose }) {
   const [shared, setShared] = useState({
-    type_seance: "conduite",
+    type: "conduite",
     date_seance: new Date().toLocaleDateString("sv-SE"),
     moniteur:    "",
     voiture:     "",
@@ -295,7 +295,7 @@ function BulkForm({ moniteurs, voitures, onSubmit, onClose }) {
     await Promise.all(rows.map(r =>
       window.api.addSession({
         student_id:  r.student.id,
-        type_seance: shared.type_seance,
+        type: shared.type,
         date_seance: shared.date_seance,
         heure:       r.heure,
         duree:       r.duree,
@@ -318,9 +318,9 @@ function BulkForm({ moniteurs, voitures, onSubmit, onClose }) {
         {/* type */}
         <div className="flex gap-2">
           {SESSION_TYPES.map(t => (
-            <button key={t} type="button" onClick={() => setS("type_seance", t)}
+            <button key={t} type="button" onClick={() => setS("type", t)}
               className={`flex-1 py-2 rounded-xl text-xs font-semibold border capitalize transition-all ${
-                shared.type_seance === t
+                shared.type === t
                   ? `${TYPE_STYLE[t]} ring-2`
                   : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
               }`}>
@@ -407,7 +407,7 @@ function BulkForm({ moniteurs, voitures, onSubmit, onClose }) {
         <div className="px-4 py-3 bg-blue-50 border border-blue-100 rounded-xl">
           <p className="text-xs text-blue-700 font-medium">
             {rows.filter(r => r.student).length} séance{rows.filter(r => r.student).length > 1 ? "s" : ""} à enregistrer
-            — {shared.type_seance} — {shared.date_seance}
+            — {shared.type} — {shared.date_seance}
           </p>
         </div>
       )}

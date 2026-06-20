@@ -34,6 +34,8 @@ contextBridge.exposeInMainWorld("api", {
         ipcRenderer.invoke("payements:add", p),
     deletePayement: (id) => 
         ipcRenderer.invoke("payements:delete", id),
+    updatePayement: (p) =>
+        ipcRenderer.invoke("payements:update", p),
     getFormations: () => 
         ipcRenderer.invoke("formations:getAll"),
     addFormation:     (data) => 

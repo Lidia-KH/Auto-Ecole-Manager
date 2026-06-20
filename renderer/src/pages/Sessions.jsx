@@ -43,9 +43,9 @@ export default function Sessions() {
         loadSessions();
     }, []);
 
-    const totalCode = sessions.filter(s => s.type_seance === "code").length;
-    const totalCreneau = sessions.filter(s => s.type_seance === "créneau").length;
-    const totalConduite = sessions.filter(s => s.type_seance === "conduite").length;
+    const totalCode = sessions.filter(s => s.type === "code").length;
+    const totalCreneau = sessions.filter(s => s.type === "créneau").length;
+    const totalConduite = sessions.filter(s => s.type === "conduite").length;
 
     const visibleSessions = sessions.filter(s => {
 
@@ -59,7 +59,7 @@ export default function Sessions() {
 
         const matchType =
             filterType === "tous" ||
-            s.type_seance === filterType;
+            s.type === filterType;
 
         return matchSearch && matchType;
     });
@@ -132,7 +132,7 @@ export default function Sessions() {
                         {FILTERS.map(f => {
                             const count = f.key === "tous"
                             ? sessions.length
-                            : sessions.filter(s => s.type_seance === f.key).length;
+                            : sessions.filter(s => s.type === f.key).length;
                             return (
                                 <button key={f.key}
                                 onClick={() => setFilterType(f.key)}
@@ -223,7 +223,7 @@ export default function Sessions() {
                                     </td>
 
                                     <td className="px-5 py-4">
-                                        <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${TYPE_STYLE[s.type_seance] ?? TYPE_STYLE.conduite}`}>
+                                        <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${TYPE_STYLE[s.type] ?? TYPE_STYLE.conduite}`}>
                                             {s.type}
                                         </span>
                                     </td>

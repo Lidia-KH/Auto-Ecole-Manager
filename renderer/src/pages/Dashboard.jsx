@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import ini from "../components/payements/ini"
-import fmt from "../components/payements/fmt"
 
 function fmtDate(str) {
   if (!str) return "—"
   const d = new Date(str)
   if (isNaN(d)) return str
-  return d.toLocaleDateString("fr-DZ", { day: "2-digit", month: "short" })
+  return d.toLocaleDateString("fr-DZ", { day: "2-digit", month: "short", year: "numeric" })
 }
 
 const TODAY       = new Date().toLocaleDateString("sv-SE")
@@ -59,7 +58,7 @@ function RevenueChart({ data }) {
             <span className="text-xs text-gray-400 w-8 flex-shrink-0 font-medium">{MONTH_FR[parseInt(month)-1]}</span>
             <div className="flex-1 h-7 bg-gray-50 rounded-xl overflow-hidden relative border border-gray-100">
               <div className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-xl transition-all duration-700" style={{ width:`${pct}%` }} />
-              <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-600">{fmt(d.total)}</span>
+              <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-600">{fmtDate(d.total)}</span>
             </div>
           </div>
         )
@@ -153,8 +152,8 @@ export default function Dashboard() {
         {/* KPI row 1 */}
         <div className="grid grid-cols-4 gap-4">
           <KpiCard label="Élèves inscrits"   value={kpi?.totalStudents??0}  sub="total enregistrés"      color="white"   onClick={() => navigate("/eleves")} />
-          <KpiCard label="Revenu ce mois"    value={fmt(kpi?.revenueMonth)} trend={kpi?.revenueTrend}    color="emerald" onClick={() => navigate("/paiements")} />
-          <KpiCard label="Total impayé"      value={fmt(kpi?.unpaidTotal)}  sub={`${kpi?.unpaidCount??0} élèves`} color={kpi?.unpaidCount>0?"red":"white"} onClick={() => navigate("/paiements")} />
+          <KpiCard label="Revenu ce mois"    value={fmtDate(kpi?.revenueMonth)} trend={kpi?.revenueTrend}    color="emerald" onClick={() => navigate("/paiements")} />
+          <KpiCard label="Total impayé"      value={fmtDate(kpi?.unpaidTotal)}  sub={`${kpi?.unpaidCount??0} élèves`} color={kpi?.unpaidCount>0?"red":"white"} onClick={() => navigate("/paiements")} />
           <KpiCard label="Taux de réussite"  value={`${kpi?.passRate??0}%`} sub="examens terminés"       color="indigo" />
         </div>
 
@@ -240,14 +239,14 @@ export default function Dashboard() {
                     className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50 cursor-pointer transition-colors">
                     <div className="w-7 h-7 rounded-full bg-red-50 text-red-500 text-xs font-bold flex items-center justify-center flex-shrink-0">{ini(s.nom,s.prenom)}</div>
                     <p className="text-sm text-gray-700 font-medium flex-1 truncate">{s.nom} {s.prenom}</p>
-                    <p className="text-xs font-bold text-red-600 flex-shrink-0">{fmt(s.reste)}</p>
+                    <p className="text-xs font-bold text-red-600 flex-shrink-0">{fmtDate(s.reste)}</p>
                   </div>
                 ))
               }
             </div>
             {kpi?.unpaidTotal > 0 && (
               <div className="px-5 py-3 border-t border-gray-50 bg-red-50/50">
-                <p className="text-xs font-bold text-red-600">Total: {fmt(kpi.unpaidTotal)}</p>
+                <p className="text-xs font-bold text-red-600">Total: {fmtDate(kpi.unpaidTotal)}</p>
               </div>
             )}
           </div>

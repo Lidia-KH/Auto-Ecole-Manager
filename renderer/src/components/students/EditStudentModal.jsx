@@ -54,6 +54,12 @@ export default function EditStudentModal({ student, formations = [], onClose, on
     if (!form.nom.trim() || !form.prenom.trim()) return
     setLoading(true)
     await window.api.updateStudent({ id: student.id, ...form })
+    if (form.formation_id) {
+      await window.api.setStudentFormation({
+        student_id: student.id,
+        formation_id: Number(form.formation_id)
+      })
+    }
     setLoading(false)
     onSaved()
   }

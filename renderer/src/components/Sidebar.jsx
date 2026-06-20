@@ -2,7 +2,7 @@ import { NavLink } from "react-router-dom";
 
 const links = [
   {
-    label: "Dashboard",
+    label: "Tableau de bord",
     path: "/",
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

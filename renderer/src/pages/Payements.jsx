@@ -3,10 +3,9 @@ import AddPayementModal from "../components/payements/AddPayementModal";
 import Stat from "../components/payements/Stat";
 import BalanceRow from "../components/payements/BalanceRow";
 import StudentPayementDetail from "../components/payements/StudentPayementDetail";
-import fmt from "../components/payements/fmt";
 import ini from "../components/payements/ini";
-
-
+import EditPaymentModal from "../components/payements/EditPayementModal";
+import fmt from "../components/payements/fmt";
 
 const MOTIFS = [
     { value: "acompte", label: "Acompte inscription" },
@@ -15,7 +14,6 @@ const MOTIFS = [
     { value: "examen", label: "Frais examen" },
     { value: "autre", label: "Autre" },
 ]
-
 
 // Paiement page
 
@@ -28,6 +26,7 @@ export default function Payements(){
     const [filterStatus, setFilter] = useState("tous")
     const [payingFor, setPayingFor] = useState(null)
     const [detailId, setDetailId] = useState(null)
+    const [editingPayment, setEditingPayment] = useState(null)
 
     async function loadAll() {
         const [s, b, m] = await Promise.all([
@@ -92,6 +91,16 @@ export default function Payements(){
                 studentId={detailId}
                 onClose={() => setDetailId(null)}
                 onPlay={s => {setDetailId(null); setPayingFor(s)}} 
+                />
+            )}
+            {editingPayment && (
+                <EditPaymentModal
+                    payment={editingPayment}
+                    onClose={() => setEditingPayment(null)}
+                    onSaved={() => {
+                        setEditingPayment(null)
+                        loadAll()
+                    }}
                 />
             )}
             <div className="max-w-6xl mx-auto space-y-6">

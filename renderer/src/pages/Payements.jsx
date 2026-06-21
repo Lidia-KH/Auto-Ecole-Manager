@@ -90,7 +90,8 @@ export default function Payements(){
                 <StudentPayementDetail
                 studentId={detailId}
                 onClose={() => setDetailId(null)}
-                onPlay={s => {setDetailId(null); setPayingFor(s)}} 
+                onPlay={s => {setDetailId(null); setPayingFor(s)}}
+                onEditPayment={setEditingPayment}
                 />
             )}
             {editingPayment && (
@@ -272,7 +273,9 @@ export default function Payements(){
                                                 key={s.id}
                                                 s={s}
                                                 onPlay={setPayingFor}
-                                                onClick={() => setDetailId(s.id)}/>
+                                                onClick={() => setDetailId(s.id)}
+                                                
+                                            />
                                         ))
                                     )}
                                 </tbody>

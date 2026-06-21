@@ -9,6 +9,8 @@ import ExamStatsCard from "../components/exams/ExamStatsCard";
 import StudentExamHistoryCard from "../components/exams/StudentExamHistoryCard";
 import AddExamenModal from "../components/exams/AddExamsModal";
 import EditExamenModal from "../components/exams/EditExamModal";
+import EditPaymentModal from "../components/payements/EditPayementModal";
+import EditSessionModal from "../components/sessions/EditSessionModal";
 
 function InfoRow( { label, value, mono = false }) {
     return(
@@ -49,6 +51,7 @@ export default function StudentDetails() {
     const [showPayement, setShowPayement] = useState(false);
     const [showSession, setShowSession] = useState(false);
     const [sessions, setSessions] = useState([]);
+    const [editingSession, setEditingSession] = useState(null);
     const [payementKey, setPayementKey] = useState(0);
     const [exams, setExams] = useState([]);
     const [showExam, setShowExam] = useState(false);
@@ -57,6 +60,7 @@ export default function StudentDetails() {
     const [whatsappMessage, setWhatsappMessage] = useState(
     `Bonjour ${student?.nom ?? ""} ${student?.prenom ?? ""}, je vous contacte depuis l'auto-école.`
     );
+    const [editingPayment, setEditingPayment] = useState(null);
 
     useEffect(() => {
         async function loadStudent() {
@@ -182,7 +186,8 @@ export default function StudentDetails() {
                     <PayementCard
                         key={payementKey}
                         studentId={student.id}
-                        onAddPayement={() => setShowPayement(true)} />
+                        onAddPayement={() => setShowPayement(true)}
+                        onEditPayment={setEditingPayment} />
                 </div>
 
                 <SessionStatsCard 
@@ -191,6 +196,7 @@ export default function StudentDetails() {
                 <SessionHistoryCard 
                 sessions={sessions} 
                 onAdd={() => setShowSession(true)} 
+                onEdit={e => setEditingSession(e)}
                 />
 
                 <ExamStatsCard
@@ -272,6 +278,30 @@ export default function StudentDetails() {
                 }} />
             )}
 
+            {editingSession && (
+                <EditSessionModal
+                    session={editingSession}
+                    onClose={() => setEditingSession(null)}
+                    onSaved={() => { setEditingSession(null); loadSessions(); }}
+                    onDeleted={() => { setEditingSession(null); loadSessions(); }}
+                />
+            )}
+
+            {editingPayment && (
+            <EditPaymentModal
+                payment={editingPayment}
+                onClose={() => setEditingPayment(null)}
+                onSaved={() => {
+                setEditingPayment(null);
+                setPayementKey(k => k + 1);
+                }}
+                onDeleted={() => {
+                setEditingPayment(null);
+                setPayementKey(k => k + 1);
+                }}
+            />
+            )}
+
             {showWhatsapp && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
                     <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-xl">
@@ -296,8 +326,9 @@ export default function StudentDetails() {
 
                         <button
                         onClick={() => {
+                            const cleanPhone = student.telephone.replace(/^0/, "213").replace(/\D/g, "")
                             window.open(
-                            `https://wa.me/${student.telephone}?text=${encodeURIComponent(
+                            `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
                                 whatsappMessage
                             )}`,
                             "_blank"

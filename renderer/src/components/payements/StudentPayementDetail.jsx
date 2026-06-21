@@ -11,7 +11,7 @@ const MOTIFS = [
 ]
 
 
-export default function StudentPayementDetail({studentId, onClose, onPlay}) {
+export default function StudentPayementDetail({studentId, onClose, onPlay, onEditPayment}) {
     const [balance, setBalance] = useState(null)
     const [history, setHistory] = useState([])
     const [student, setStudent] = useState(null)
@@ -101,7 +101,9 @@ export default function StudentPayementDetail({studentId, onClose, onPlay}) {
                     ): (
                         <div className="space-y-2">
                             {history.map(p => (
-                                <div key={p.id} className="flex items-center justify-between py-2.5 px-3 bg-gray-50 rounded-xl">
+                                <div key={p.id} 
+                                onClick={() => onEditPayment?.(p)}
+                                className="flex items-center justify-between py-2.5 px-3 bg-gray-50 hover:bg-gray-100 rounded-xl cursor-pointer transition-colors">
                                     <div>
                                         <p className="text-xs font-medium text-gray-700">{MOTIF_LABEL[p.motif] ?? p.motif}</p>
                                         <p className="text-xs text-gray-400 mt-0.5">{p.date_payement}</p>

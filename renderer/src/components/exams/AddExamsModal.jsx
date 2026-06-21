@@ -161,15 +161,17 @@ function SingleForm({ prefillStudent, onSubmit, onClose }) {
       resultat:    "en_attente",
       note,
     })
-    if (notifyWhatsapp && form.student.telephone) {
+    if (notifyWhatsapp && student.telephone) {
       const msg =
         `Bonjour ${student.nom} ${student.prenom},\n\n` +
         `Votre examen de ${shared.type_examen} est programmé le ${shared.date_examen}` +
         `${shared.heure ? ` à ${shared.heure}` : ""}.` +
         `${shared.lieu ? `\nLieu : ${shared.lieu}` : ""}\n\nAuto-école.`;
 
+      const cleanPhone = student.telephone.replace(/^0/, "213").replace(/\D/g, "")
+
       window.open(
-        `https://wa.me/${student.telephone}?text=${encodeURIComponent(msg)}`,
+        `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`,
         "_blank"
       );
     }

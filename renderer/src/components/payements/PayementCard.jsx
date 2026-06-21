@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import fmt from "./fmt";
 
-export default function PayementCard({ studentId, onAddPayement }) {
+export default function PayementCard({ studentId, onAddPayement, onEditPayment }) {
     const [balance, setBalance] = useState(null);
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -96,13 +96,14 @@ export default function PayementCard({ studentId, onAddPayement }) {
                         Aucun paiement enregistré
                     </p>
                 ) : (
-                    <div className="space-y-2">
+                    <div>
                         <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
                             Historique
                         </p>
-                        {history.slice(0, 4).map(p => (
-                            <div key={p.id} className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-xl">
-                                <div>
+                        <div className="h-56 overflow-y-auto pr-1 space-y-2">
+                        {history.map(p => (
+                            <div key={p.id} className="flex items-center justify-between py-2 px-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors">
+                                <div className="min-w-0">
 
                                     <p className="text-xs font-medium text-gray-700">
                                         {MOTIF_LABEL[p.motif] ?? p.motif}
@@ -119,17 +120,23 @@ export default function PayementCard({ studentId, onAddPayement }) {
                                         {p.date_payement}
                                     </p>
                                 </div>
-                                <p className="text-sm font-semibold text-emerald-700">
-                                    +{fmt(p.montant)}
-                                </p>
+                                <div className="flex items-center gap-2 flex-shrink-0">
+                                    <p className="text-sm font-semibold text-emerald-700">
+                                        +{fmt(p.montant)}
+                                    </p>
+                                    <button
+                                    onClick={() => onEditPayment?.(p)}
+                                    className="p-1.5 rounded-lg bg-white border border-gray-200 hover:bg-gray-100 hover:border-gray-300 text-gray-400 hover:text-gray-600 transition-colors"
+                                    title="Modifier">
+                                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
                         ))}
-
-                        {history.length > 4 && (
-                            <p className="text-xs text-gray-400 text-center pt-1">
-                                +{history.length -4} autre{history.length -4 > 1 ? "s": " "}
-                            </p>
-                        )}
+                        </div>
                     </div>
                 )}
             </div>

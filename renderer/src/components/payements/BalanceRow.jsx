@@ -1,7 +1,7 @@
 import fmt from "./fmt"
 import ini from "./ini"
 
-export default function BalanceRow({ s, onPlay, onClick }) {
+export default function BalanceRow({ s, onPlay, onClick, onDelete }) {
     const pct = s.prix > 0 ? Math.round((s.total_paye / s.prix) * 100) : 0
     const status = s.reste <= 0 ? "soldé" : s.total_paye === 0 ? "impayé" : "partiel"
     const statusStyle = {
@@ -88,11 +88,8 @@ export default function BalanceRow({ s, onPlay, onClick }) {
                     </button>
 
                     {/* Edit */}
-                    <button
-                    onClick={(ev) => {
-                        ev.stopPropagation();
-                        onEdit?.(s);
-                    }}
+                    {/* <button
+                    onClick={() => setDetailId(s.is)}
                     className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-all"
                     title="Modifier"
                     >
@@ -100,7 +97,7 @@ export default function BalanceRow({ s, onPlay, onClick }) {
                         <path strokeLinecap="round" strokeLinejoin="round"
                         d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
-                    </button>
+                    </button> */}
 
                     {/* Chevron */}
                     <svg className="w-4 h-4 text-gray-200 group-hover:text-gray-400 transition-colors"

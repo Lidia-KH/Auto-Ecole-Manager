@@ -38,7 +38,7 @@ export default function EditPaymentModal({ payment, onClose, onSaved, onDeleted 
     e.preventDefault();
     setLoading(true);
 
-    await window.api.updatePayment({
+    await window.api.updatePayement({
       id: payment.id,
       ...form,
     });
@@ -49,7 +49,7 @@ export default function EditPaymentModal({ payment, onClose, onSaved, onDeleted 
 
   async function handleDelete() {
     setLoading(true);
-    await window.api.deletePayment(payment.id);
+    await window.api.deletePayement(payment.id);
     setLoading(false);
     onDeleted();
   }
@@ -86,8 +86,10 @@ export default function EditPaymentModal({ payment, onClose, onSaved, onDeleted 
               value={form.motif}
               onChange={e => set("motif", e.target.value)}
             >
-              <option value="formation">Formation</option>
-              <option value="examen">Examen</option>
+              <option value="acompte">Acompte inscription</option>
+              <option value="seance">Séance conduite</option>
+              <option value="solde">Solde total</option>
+              <option value="examen">Frais examen</option>
               <option value="autre">Autre</option>
             </select>
           </Field>
@@ -99,7 +101,7 @@ export default function EditPaymentModal({ payment, onClose, onSaved, onDeleted 
               onChange={e => set("scope", e.target.value)}
             >
               <option value="formation">Formation</option>
-              <option value="session">Session</option>
+              <option value="session">Séance</option>
               <option value="exam">Examen</option>
             </select>
           </Field>

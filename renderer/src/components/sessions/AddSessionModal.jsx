@@ -142,8 +142,10 @@ function SingleForm({ prefillStudent, moniteurs, voitures, onSubmit, onClose }) 
           `Votre séance de ${form.type} est programmée le ${form.date_seance} à ${form.heure}.\n\n` +
           `Auto-école.`;
 
+        const cleanPhone = form.student.telephone.replace(/^0/, "213").replace(/\D/g, "")
+
         window.open(
-          `https://wa.me/${form.student.telephone}?text=${encodeURIComponent(msg)}`,
+          `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`,
           "_blank"
         );
       }

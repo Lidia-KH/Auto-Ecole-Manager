@@ -20,6 +20,14 @@ main/main
 preload
 preload/preload
 
+release
+release/*
+
+licensing
+licensing/*
+licensing/public.pem
+licensing/private.pem
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

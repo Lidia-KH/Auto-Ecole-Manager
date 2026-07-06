@@ -3,6 +3,21 @@ const { contextBridge, ipcRenderer } = require("electron");
 console.log("== PRELOAD LOADED SUCCESSFULLY");
 
 contextBridge.exposeInMainWorld("api", {
+    getMachineId: () =>
+        ipcRenderer.invoke("license:getMachineId"),
+    getLicense: () =>
+        ipcRenderer.invoke("license:get"),
+
+    saveLicense: (data) =>
+        ipcRenderer.invoke("license:save", data),
+
+    isAppLicensed: () =>
+        ipcRenderer.invoke("license:isLicensed"),
+
+    activateLicense: (license) =>
+        ipcRenderer.invoke("license:activate", license),
+
+
     getStudents: () => 
         ipcRenderer.invoke("students:getAll"),
 

@@ -1,6 +1,43 @@
 const { ipcMain } = require("electron");
 const db = require("./database");
 const { resolve } = require("node:dns");
+const { getMachineId } = require("./license");
+
+
+ipcMain.handle("license:getMachineId", () => {
+    return getMachineId();
+});
+
+const {
+    getLicense,
+    saveLicense,
+    isAppLicensed,
+    activateLicense
+} = require("./licenseService");
+
+ipcMain.handle(
+    "license:get",
+    () => getLicense()
+);
+
+ipcMain.handle(
+    "license:save",
+    (_, data) => saveLicense(data)
+);
+
+
+ipcMain.handle(
+    "license:isLicensed",
+    async () => {
+        return await isAppLicensed();
+    }
+);
+
+
+ipcMain.handle(
+    "license:activate",
+    (_, license) => activateLicense(license)
+);
 
 // ====== Students Handlers ======
 
@@ -19,7 +56,7 @@ ipcMain.handle("students:getAll", async () => {
 
 ipcMain.handle("students:add", async (_, student) => {
     return new Promise((resolve, reject) => {
-        // const numero = generateNumero();
+
 
         db.run(
             `
@@ -96,9 +133,9 @@ ipcMain.handle("students:getById", async (_, id) => {
 ipcMain.handle("students:update", (_, data) =>
   new Promise((res, rej) =>
     db.run(
-      `UPDATE students SET numero=?, nom=?, prenom=?, date_de_naissance=?, telephone=?, type_permis=?, status=?, formation_id=?
+      `UPDATE students SET numero=?, nom=?, prenom=?, date_de_naissance=?, telephone=?, type_permis=?, status=?, formation_id=?, date_permis_obtenu=?
        WHERE id=?`,
-      [data.numero, data.nom, data.prenom, data.date_de_naissance, data.telephone, data.type_permis, data.status, data.formation_id, data.id],
+      [data.numero, data.nom, data.prenom, data.date_de_naissance, data.telephone, data.type_permis, data.status, data.formation_id, data.date_permis_obtenu ?? null, data.id],
       function (e) {
         if (e) rej(e)
         else res({ success: true, id: this.lastID })

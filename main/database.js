@@ -4,8 +4,15 @@ const { app } = require("electron");
 const { formatWithOptions } = require("util");
 
 const dbPath = path.join(app.getPath("userData"), "autoecole.db");
+console.log("Database:", dbPath);
 
-const db = new sqlite3.Database(dbPath);
+const db = new sqlite3.Database(dbPath, err => {
+    if (err) {
+        console.error("Database error:", err);
+    } else {
+        console.log("SQLite connected.");
+    }
+});
 
 db.serialize(() => {
     db.run(`
@@ -19,10 +26,11 @@ db.serialize(() => {
             type_permis TEXT,
             status TEXT DEFAULT 'actif',
             date_inscription TEXT,
+            date_permis_obtenu TEXT,
             formation_id INTEGER NOT NULL REFERENCES formations(id)
         )
     `);
- 
+
     db.run(`
         CREATE TABLE IF NOT EXISTS payements (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -87,6 +95,22 @@ db.serialize(() => {
         resultat TEXT DEFAULT 'en_attente',
         note TEXT,
         created_at TEXT DEFAULT (datetime('now'))
+        )
+    `);
+
+    db.run(`
+        CREATE TABLE IF NOT EXISTS license (
+            id INTEGER PRIMARY KEY CHECK(id = 1),
+
+            customer_name TEXT,
+
+            machine_id TEXT NOT NULL,
+
+            license_key TEXT NOT NULL,
+
+            activated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+
+            expires_at TEXT
         )
     `);
 });

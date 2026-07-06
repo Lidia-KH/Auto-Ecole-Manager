@@ -95,7 +95,23 @@ export default function StudentDetails() {
 
     const initials = ((student.nom?.[0] ?? "") + (student.prenom?.[0] ?? "")).toUpperCase();
 
-      const ACTION_BUTTONS = [
+    async function handlePermisObtenu() {
+        const datePermisObtenu = new Date().toISOString().split("T")[0];
+        await window.api.updateStudent({
+            id: student.id,
+            numero: student.numero,
+            nom: student.nom,
+            prenom: student.prenom,
+            date_de_naissance: student.date_de_naissance,
+            telephone: student.telephone,
+            type_permis: student.type_permis,
+            status: "archivé",
+            date_permis_obtenu: datePermisObtenu,
+        });
+        setStudent(s => ({ ...s, status: "archivé", date_permis_obtenu: datePermisObtenu }));
+    }
+
+    const ACTION_BUTTONS = [
         {
         label: "Ajouter une séance",
         color: "blue",
@@ -179,8 +195,25 @@ export default function StudentDetails() {
                             <InfoRow label="Permis" value={`Type ${student.type_permis}`} />
                             <InfoRow label="Date de naissance" value={student.date_de_naissance} />
                             <InfoRow label="Date d'inscription" value={student.date_inscription?.split("T")[0]} />
+                            {student.status === "archivé" && student.date_permis_obtenu && (
+                                <InfoRow label="Permis obtenu le" value={student.date_permis_obtenu} />
+                            )}
 
                         </div>
+
+                        {student.status !== "archivé" && (
+                            <div className="px-6 pb-5">
+                                <button
+                                onClick={handlePermisObtenu}
+                                className="w-full flex items-center justify-center gap-2 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-sm font-semibold rounded-xl border border-emerald-200 transition-all active:scale-[.98]"
+                                >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                                </svg>
+                                Permis obtenu 
+                                </button>
+                            </div>
+                        )}
                         
                     </div>
                     <PayementCard
@@ -282,8 +315,16 @@ export default function StudentDetails() {
                 <EditSessionModal
                     session={editingSession}
                     onClose={() => setEditingSession(null)}
-                    onSaved={() => { setEditingSession(null); loadSessions(); }}
-                    onDeleted={() => { setEditingSession(null); loadSessions(); }}
+                    onSaved={async () => {
+                    const updated = await window.api.getSessionByStudent(student.id)
+                    setSessions(updated)
+                    setEditingSession(null)
+                    }}
+                    onDeleted={async () => {
+                    const updated = await window.api.getSessionByStudent(student.id)
+                    setSessions(updated)
+                    setEditingSession(null)
+                    }}
                 />
             )}
 

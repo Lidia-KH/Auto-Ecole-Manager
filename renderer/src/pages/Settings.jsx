@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 
 const inputCls = "w-full px-3 py-2.5 rounded-xl text-sm bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 hover:border-gray-300 transition-all"
 
@@ -250,6 +250,12 @@ function VoituresSection() {
 }
 
 export default function Settings() {
+  const [machineId, setMachineId] = useState("")
+  
+  useEffect(() => {
+    window.api.getMachineId().then(setMachineId)
+  }, [])
+
   return (
     <div className="min-h-screen bg-[#f8f9fc] p-8">
       <div className="max-w-3xl mx-auto space-y-6">
@@ -261,6 +267,15 @@ export default function Settings() {
         <FormationsSection />
         <MoniteursSection />
         <VoituresSection />
+        <div className="rounded-xl border p-4 bg-white">
+          <p className="text-sm text-gray-500">
+              Machine ID
+          </p>
+
+          <p className="font-mono break-all">
+              {machineId}
+          </p>
+      </div>
       </div>
     </div>
   )

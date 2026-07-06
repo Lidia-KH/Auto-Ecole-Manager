@@ -69,7 +69,8 @@ const links = [
 
 export default function Sidebar() {
   return (
-    <aside className="w-72 bg-white border-r border-gray-100 flex flex-col">
+    <aside  className="fixed inset-y-0 left-0 w-72 bg-white border-r border-gray-100 shadow-sm flex flex-col z-50">
+
       <div className="h-16 flex items-center px-6 border-b border-gray-100">
         <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold">
           AE

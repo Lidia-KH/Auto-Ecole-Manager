@@ -28,6 +28,7 @@ export default function EditStudentModal({ student, formations = [], onClose, on
     type_permis:       student.type_permis       ?? "B",
     formation_id:      student.formation_id      ?? "",
     status:            student.status            ?? "actif",
+    date_permis_obtenu: student.date_permis_obtenu  ?? "",
   })
   const [loading, setLoading] = useState(false)
   const [confirming, setConfirming] = useState(false)
@@ -44,6 +45,7 @@ export default function EditStudentModal({ student, formations = [], onClose, on
         type_permis: student.type_permis ?? "B",
         formation_id: student.formation_id ?? "",
         status: student.status ?? "actif",
+        date_permis_obtenu: student.date_permis_obtenu  ?? "",
     })
 }, [student])
 
@@ -140,6 +142,10 @@ export default function EditStudentModal({ student, formations = [], onClose, on
                   <option key={p}>{p}</option>
                 ))}
               </select>
+            </Field>
+            <Field label="Permis obtenu le">
+              <input type="date" className={inputCls}
+                value={form.date_permis_obtenu} onChange={e => set("date_permis_obtenu", e.target.value)} />
             </Field>
           </div>
 

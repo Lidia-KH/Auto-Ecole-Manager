@@ -8,7 +8,7 @@
     "dev:electron": "ELECTRON_DISABLE_GPU=1 electron main/main.js",
     "build:renderer": "cd renderer && npm run build",
     "build": "npm run build:renderer",
-    "dist": "npm run build:renderer && electron-builder"
+    "dist": "npm run build:renderer && electron-builder --publish never"
   },
   "keywords": [],
   "author": "",

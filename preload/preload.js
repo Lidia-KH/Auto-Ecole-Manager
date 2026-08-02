@@ -107,6 +107,18 @@ contextBridge.exposeInMainWorld("api", {
     sendWhatsappMessage: (payload) =>
         ipcRenderer.invoke("whatsapp:send", payload),
 
+    exportCandidateForms: (studentIds) =>
+        ipcRenderer.invoke("export:candidateForms", studentIds),
+    
+    exportExamList: (studentIds, meta) =>
+        ipcRenderer.invoke("export:examList", { studentIds, meta }),
+
+    getSchoolInfo: () =>
+        ipcRenderer.invoke("school:get"),
+    
+    saveSchoolInfo: (data) =>
+        ipcRenderer.invoke("school:save", data),
+    
 
     
 });

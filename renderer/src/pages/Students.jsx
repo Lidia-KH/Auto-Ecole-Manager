@@ -62,6 +62,39 @@ export default function Students() {
     const [activeFilter, setActiveFilter] = useState("tous");
     const [editingStudent, setEditingStudent] = useState(null);
 
+    const [selected, setSelected] = useState(new Set());
+    const [exporting, setExporting] = useState(false);
+
+    function toggleSelect(id) {
+    setSelected(s => {
+        const next = new Set(s);
+        next.has(id) ? next.delete(id) : next.add(id);
+        return next;
+    });
+    }
+    function toggleSelectAll() {
+    setSelected(s => s.size === visible.length ? new Set() : new Set(visible.map(v => v.id)));
+    }
+
+    async function handleExportWord() {
+    if (selected.size === 0) return;
+    setExporting(true);
+    const res = await window.api.exportCandidateForms([...selected]);
+    setExporting(false);
+    if (!res.canceled) alert(`Fichier Word créé : ${res.filePath}`);
+    }
+
+    async function handleExportExcel() {
+    if (selected.size === 0) return;
+    setExporting(true);
+    const res = await window.api.exportExamList([...selected], {
+        centreExamen: "",
+        dateExamen: new Date().toISOString().split("T")[0],
+    });
+    setExporting(false);
+    if (!res.canceled) alert(`Fichier Excel créé : ${res.filePath}`);
+    }
+
     const [form, setForm] = useState({
         numero: "",
         nom: "",
@@ -179,6 +212,27 @@ export default function Students() {
                         {showForm ? "Annuler" : "Ajouter un élève"}
                     </button>
                 </div>
+                {selected.size > 0 && (
+                    <div className="flex items-center justify-between px-4 py-3 bg-blue-50 border border-blue-100 rounded-xl">
+                        <p className="text-sm font-medium text-blue-700">
+                        {selected.size} élève{selected.size > 1 ? "s" : ""} sélectionné{selected.size > 1 ? "s" : ""}
+                        </p>
+                        <div className="flex gap-2">
+                        <button onClick={handleExportWord} disabled={exporting}
+                            className="px-3 py-1.5 text-xs font-semibold bg-white border border-blue-200 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50">
+                            Exporter fiches (Word)
+                        </button>
+                        <button onClick={handleExportExcel} disabled={exporting}
+                            className="px-3 py-1.5 text-xs font-semibold bg-white border border-blue-200 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50">
+                            Exporter liste examen (Excel)
+                        </button>
+                        <button onClick={() => setSelected(new Set())}
+                            className="px-3 py-1.5 text-xs font-medium text-gray-400 hover:text-gray-600">
+                            Annuler
+                        </button>
+                        </div>
+                    </div>
+                )}
                 {showForm && (
                     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                         <div className="px-6 py-4 border-b border-gray-50">
@@ -336,22 +390,32 @@ export default function Students() {
                         </div>
                     ) : (
                         <table className="w-full">
-                            <thead>
-                                <tr className="border-b border-gray-50">
-                                    {["Elève", "Numéro", "Téléphone", "Permis", "Status", ""]
-                                    .map(h => (
-                                        <th key={h} className="px-5 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-widest">
-                                            {h}
-
-                                        </th>
-                                    ))}
-
-                                </tr>
-                            </thead>
+                        <thead>
+                            <tr className="border-b border-gray-50">
+                                <th className="px-5 py-3.5 w-10">
+                                    <input type="checkbox"
+                                        checked={visible.length > 0 && selected.size === visible.length}
+                                        onChange={toggleSelectAll}
+                                        className="rounded border-gray-300" />
+                                </th>
+                                {["Elève", "Numéro", "Téléphone", "Permis", "Status", ""]
+                                .map(h => (
+                                    <th key={h} className="px-5 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-widest">
+                                        {h}
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
                             <tbody className="divide-y devide-gray-50">
                                 {visible.map(s => (
                                     <tr key={s.id} onClick={() => navigate(`/eleves/${s.id}`)} 
                                     className="group hover:bg-blue-50/40 transition-colors duration-100 cursor-pointer">
+                                        <td className="px-5 py-3.5" onClick={e => e.stopPropagation()}>
+                                            <input type="checkbox"
+                                                checked={selected.has(s.id)}
+                                                onChange={() => toggleSelect(s.id)}
+                                                className="rounded border-gray-300" />
+                                        </td>
 
                                         <td className="px-5 py-3.5">
                                             <div className="flex items-center gap-3">

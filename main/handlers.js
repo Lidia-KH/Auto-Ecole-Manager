@@ -1,4 +1,5 @@
-const { ipcMain } = require("electron");
+const { ipcMain, dialog, shell, app } = require("electron");
+const path = require("path");
 const db = require("./database");
 const { resolve } = require("node:dns");
 const { getMachineId } = require("./license");
@@ -674,4 +675,104 @@ ipcMain.handle("whatsapp:send", async (_, { phone, message }) => {
     `?text=${encodeURIComponent(message)}`;
 
   await shell.openExternal(url);
+});
+
+// ====== Export ========
+
+ipcMain.handle("export:candidateForms", async (_, studentIds) => {
+    const students = await new Promise((resolve, reject) => {
+        const placeholders = studentIds.map(() => "?").join(",");
+        db.all(
+            `SELECT * FROM students WHERE id IN (${placeholders})`,
+            studentIds,
+            (err, rows) => { if (err) reject(err); else resolve(rows); }
+        );
+    });
+
+    const { filePath, canceled } = await dialog.showSaveDialog({
+        title: "Exporter les fiches candidats",
+        defaultPath: path.join(app.getPath("documents"), "fiches-candidats.docx"),
+        filters: [{ name: "Word", extensions: ["docx"] }],
+    });
+    if (canceled || !filePath) return { canceled: true };
+
+    // no school_info table yet — pass null, the school line stays blank on the form
+    const schoolInfo = await new Promise((resolve, reject) => {
+        db.get("SELECT * FROM school_info WHERE id = 1", [], (err, row) => {
+            if (err) reject(err); else resolve(row);
+        });
+    });
+    
+    await buildCandidateFormsDocx(students, schoolInfo, filePath);
+
+    shell.showItemInFolder(filePath);
+    return { canceled: false, filePath };
+});
+
+ipcMain.handle("export:examList", async (_, { studentIds, meta }) => {
+    const students = await new Promise((resolve, reject) => {
+        const placeholders = studentIds.map(() => "?").join(",");
+        db.all(
+            `SELECT * FROM students WHERE id IN (${placeholders})`,
+            studentIds,
+            (err, rows) => { if (err) reject(err); else resolve(rows); }
+        );
+    });
+
+    const examsByStudent = {};
+    for (const s of students) {
+        examsByStudent[s.id] = await new Promise((resolve, reject) => {
+            db.all(
+                "SELECT * FROM exams WHERE student_id = ? ORDER BY date_examen DESC",
+                [s.id],
+                (err, rows) => { if (err) reject(err); else resolve(rows); }
+            );
+        });
+    }
+
+    const { filePath, canceled } = await dialog.showSaveDialog({
+        title: "Exporter la liste d'examen",
+        defaultPath: path.join(app.getPath("documents"), "liste-examen.xlsx"),
+        filters: [{ name: "Excel", extensions: ["xlsx"] }],
+    });
+    if (canceled || !filePath) return { canceled: true };
+
+    await buildExamListXlsx(students, examsByStudent, meta, filePath);
+    shell.showItemInFolder(filePath);
+    return { canceled: false, filePath };
+});
+
+// ====== School info =====
+
+ipcMain.handle("school:get", () => {
+    return new Promise((resolve, reject) => {
+        db.get(
+            "SELECT * FROM school_info WHERE id = 1",
+            [],
+            (err, row) => {
+                if (err) reject(err);
+                else resolve(row); // undefined/null on first run — fine, frontend handles it
+            }
+        );
+    });
+});
+
+ipcMain.handle("school:save", (_, data) => {
+    return new Promise((resolve, reject) => {
+        db.run(
+            `INSERT INTO school_info (id, nom, adresse, telephone, email, directeur)
+             VALUES (1, ?, ?, ?, ?, ?)
+             ON CONFLICT(id) DO UPDATE SET
+                nom = excluded.nom,
+                adresse = excluded.adresse,
+                telephone = excluded.telephone,
+                email = excluded.email,
+                directeur = excluded.directeur`,
+            [data.nom, data.adresse, data.telephone, data.email, data.directeur],
+            function (err) {
+                if (err) reject(err);
+                else resolve({ success: true });
+            }
+        );
+    });
 });

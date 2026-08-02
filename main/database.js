@@ -113,6 +113,17 @@ db.serialize(() => {
             expires_at TEXT
         )
     `);
+    db.run(`
+        CREATE TABLE IF NOT EXISTS school_info (
+            id INTEGER PRIMARY KEY CHECK(id = 1),
+            nom TEXT,
+            adresse TEXT,
+            telephone TEXT,
+            email TEXT,
+            directeur TEXT
+        )
+    `);
+
 });
 
 module.exports = db;

@@ -49,6 +49,9 @@
       "package.json"
     ],
     "asar": true,
+    "asarUnpack": [
+      "**/node_modules/sqlite3/**/*"
+    ],
     "win": {
       "target": "nsis"
     },

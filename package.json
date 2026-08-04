@@ -36,31 +36,37 @@
     "vite": "^8.0.13",
     "wait-on": "^9.0.10"
   },
-  "build": {
-    "appId": "com.autoecole.manager",
-    "productName": "AutoEcole Manager",
-    "directories": {
-      "output": "release"
-    },
-    "files": [
-      "main/**/*",
-      "preload/**/*",
-      "renderer/dist/**/*",
-      "package.json"
-    ],
-    "asar": true,
-    "asarUnpack": [
-      "**/node_modules/sqlite3/**/*"
-    ],
-    "win": {
-      "target": "nsis"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
-    },
-    "icon": "assets/icon.png"
-  }
+    "build": {
+      "appId": "com.autoecole.manager",
+      "productName": "AutoEcole Manager",
+      "directories": {
+        "output": "release"
+      },
+      "files": [
+        "main/**/*",
+        "preload/**/*",
+        "renderer/dist/**/*",
+        "package.json"
+      ],
+      "asar": true,
+      "asarUnpack": [
+        "**/node_modules/sqlite3/**/*"
+      ],
+      "win": {
+        "target": "nsis",
+        "icon": "assets/icon.ico"
+      },
+      "linux": {
+        "target": "AppImage",
+        "icon": "assets/icon.png"
+      },
+      "nsis": {
+        "oneClick": false,
+        "allowToChangeInstallationDirectory": true,
+        "createDesktopShortcut": true,
+        "createStartMenuShortcut": true
+      }
+    }
 }
+
+
